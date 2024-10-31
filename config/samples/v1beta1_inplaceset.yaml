@@ -1,0 +1,9 @@
+apiVersion: extendeddeployment.io/v1beta1
+kind: InplaceSet
+metadata:
+  labels:
+    app.kubernetes.io/name: extended-deployment
+    app.kubernetes.io/managed-by: kustomize
+  name: inplaceset-sample
+spec:
+  # TODO(user): Add fields here

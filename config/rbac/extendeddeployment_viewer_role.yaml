@@ -1,0 +1,23 @@
+# permissions for end users to view extendeddeployments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: extended-deployment
+    app.kubernetes.io/managed-by: kustomize
+  name: extendeddeployment-viewer-role
+rules:
+- apiGroups:
+  - extendeddeployment.io
+  resources:
+  - extendeddeployments
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - extendeddeployment.io
+  resources:
+  - extendeddeployments/status
+  verbs:
+  - get

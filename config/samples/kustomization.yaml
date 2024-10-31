@@ -1,0 +1,6 @@
+## Append samples of your project ##
+resources:
+- v1beta1_extendeddeployment.yaml
+- v1beta1_inplaceset.yaml
+- v1beta1_deployregion.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples
