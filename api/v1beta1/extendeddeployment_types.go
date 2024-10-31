@@ -43,9 +43,9 @@ type UpdateStrategyType string
 type SubsetType string
 
 const (
-	//Beta策略
+	// Beta rollout strategy
 	BetaRolloutStrategyType RolloutStrategyType = "Beta"
-	//分组策略
+	// Group rollout strategy
 	GroupRolloutStrategyType RolloutStrategyType = "Group"
 
 	// DeleteAllFirstUpdateStrategyTypeUpdateStrategyType indicates that we kill all existing
@@ -65,7 +65,7 @@ const (
 	// spec will fall back to ReCreate CloneSetUpdateStrategyType where pod will be recreated.
 	InPlaceIfPossibleUpdateStrategyType UpdateStrategyType = "InPlaceIfPossible"
 
-	//支持的subset类型
+	// Supported subset types
 	InPlaceSetSubsetType SubsetType = "InplaceSet"
 	ReplicaSetSubsetType SubsetType = "ReplicaSet"
 	DeploymentSubsetType SubsetType = "Deployment"
@@ -77,7 +77,7 @@ const (
 )
 
 type UpdateStrategy struct {
-	// 升级策略
+	// Update strategy
 	// +kubebuilder:validation:Enum=DeleteAllFirst;ReCreate;RollingUpdate;InPlaceIfPossible
 	// +kubebuilder:default:=ReCreate
 	// +optional
@@ -102,31 +102,31 @@ type Strategy struct {
 	// +kubebuilder:default:=5
 	// +optional
 	MinReadySeconds int32 `json:"minReadySeconds,omitempty"`
-	//是否等待确认
+	// Whether to wait for confirmation
 	// +kubebuilder:default:=false
 	// +optional
 	NeedWaitingForConfirm bool `json:"needWaitingForConfirm"`
-	//是否开启第一次等待确认
+	// Whether to enable the first confirmation
 	// +kubebuilder:default:=false
 	// +optional
 	NeedFirstConfirm bool `json:"needFirstConfirm"`
-	//等待就绪超时时间
+	// Timeout for waiting for readiness
 	// +kubebuilder:default:=0
 	// +optional
 	SyncWaitTimeout int32 `json:"syncWaitTimeout,omitempty"`
-	//发布策略
+	// Rollout strategy
 	// +kubebuilder:validation:Enum=Beta;Group
 	// +kubebuilder:default:=Beta
 	// +optional
 	RolloutStrategy RolloutStrategyType `json:"rolloutStrategy"`
-	//更新阻止
+	// Update pause
 	// +optional
 	Pause bool `json:"pause,omitempty"`
 
-	//故障转移策略，pod pending起不来，并且因为资源不足
+	// Auto reschedule strategy for pods that are pending due to insufficient resources
 	// +optional
 	AutoReschedule *AutoReschedule `json:"autoReschedule,omitempty"`
-	// 升级策略
+	// Upgrade strategy
 	// +optional
 	UpdateStrategy *UpdateStrategy `json:"updateStrategy,omitempty"`
 }
@@ -143,17 +143,17 @@ type AutoReschedule struct {
 
 // ExtendedDeploymentSpec defines the desired state of ExtendedDeployment.
 type ExtendedDeploymentSpec struct {
-	//保存的历史rs记录
+	// The number of historical Subset records to be saved.
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default:=5
 	// +optional
 	HistoryLimit int32 `json:"historyLimit,omitempty"`
-	//rs的selector 匹配
+	// The selector for matching Subset.
 	Selector *metav1.LabelSelector `json:"selector,omitempty"`
-	//关联的资源类型
+	// The type of associated resources.
 	// +optional
 	SubsetType SubsetType `json:"subsetType,omitempty"`
-	//extended-deployment更新策略
+	// The update strategy for extended-deployment.
 	// +optional
 	Strategy Strategy `json:"strategy"`
 
@@ -161,24 +161,24 @@ type ExtendedDeploymentSpec struct {
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	Template v1.PodTemplateSpec `json:"template"`
-	// 分区总副本数
+	// The total number of replicas in the partition.
 	// +kubebuilder:validation:Minimum=0
 	// +kubebuilder:default:=0
 	Replicas *int32 `json:"replicas,omitempty"`
-	//分区选择
+	// The partition selection.
 	// +optional
 	Regions []Region `json:"regions,omitempty"`
-	//分区重载
+	// The partition override.
 	// +optional
 	Overriders []Overriders `json:"overriders,omitempty"`
 }
 
 // Placement represents the rule for select clusters.
 type Region struct {
-	//分区名称
+	// Region name
 	// +kubebuilder:validation:MinLength=1
 	Name string `json:"name"`
-	//分区期望副本数
+	// Expected replicas in the partition
 	Replicas *intstr.IntOrString `json:"replicas,omitempty"`
 }
 
@@ -188,7 +188,7 @@ type Region struct {
 // - ImageOverrider
 // - Plaintext
 type Overriders struct {
-	//分区名字
+	// Region name
 	Name string `json:"name,omitempty"`
 	// Plaintext represents override rules defined with plaintext overriders.
 	// +optional
@@ -231,11 +231,11 @@ type ExtendedDeploymentStatus struct {
 	// +optional
 	CollisionCount *int32 `json:"collisionCount,omitempty" protobuf:"varint,8,opt,name=collisionCount"`
 
-	// 分区统计，regionName: availableReplicas/desiredReplicas
+	// Region overview, format: regionName: availableReplicas/desiredReplicas
 	// +optional
 	Overview string `json:"overview,omitempty"`
 
-	// 上一次term开始的时间
+	// Last term start time
 	// +optional
 	LastTermStartTime string `json:"lastTermStartTime,omitempty"`
 }
@@ -269,7 +269,7 @@ type ExtendedDeploymentList struct {
 
 type RegionStatus struct {
 	RegionName string `json:"region,omitempty"`
-	// 所有InplaceSet副本数总和
+	// Total number of replicas in the region.
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 	// Total number of non-terminated pods targeted by this deployment that have the desired template spec.
