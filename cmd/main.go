@@ -36,7 +36,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	extendeddeploymentiov1beta1 "extendeddeployment.io/extended-deployment/api/v1beta1"
-	"extendeddeployment.io/extended-deployment/internal/controller"
+	"extendeddeployment.io/extended-deployment/pkg/controller"
 	// +kubebuilder:scaffold:imports
 )
 
