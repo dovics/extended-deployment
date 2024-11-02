@@ -22,12 +22,13 @@ import (
 
 	"extendeddeployment.io/extended-deployment/cmd/app/options"
 	controllerscontext "extendeddeployment.io/extended-deployment/pkg/controllers/context"
+	"extendeddeployment.io/extended-deployment/pkg/controllers/deployregion"
+	"extendeddeployment.io/extended-deployment/pkg/controllers/extendeddeployment"
 	"extendeddeployment.io/extended-deployment/pkg/controllers/inplaceset"
 	"extendeddeployment.io/extended-deployment/pkg/sharedcli/klogflag"
-	"extendeddeployment.io/extended-deployment/pkg/version"
-
 	"extendeddeployment.io/extended-deployment/pkg/utils/gclient"
 	"extendeddeployment.io/extended-deployment/pkg/utils/informermanager"
+	"extendeddeployment.io/extended-deployment/pkg/version"
 )
 
 func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
@@ -99,13 +100,13 @@ func Run(ctx context.Context, opts *options.Options) error {
 	}
 	setupControllers(k8sClient, controllerManager, opts, ctx.Done())
 
-	// // webhook
-	// if !opts.DisableWebhook {
-	// 	if err := controllerManager.Add(admission_webhook.NewHookServer(opts.CertsDir, opts.WebhookPort)); err != nil {
-	// 		klog.Errorf(`add webhook server`)
-	// 		return err
-	// 	}
-	// }
+	// webhook
+	if !opts.DisableWebhook {
+		// if err := controllerManager.Add(admission_webhook.NewHookServer(opts.CertsDir, opts.WebhookPort)); err != nil {
+		// 	klog.Errorf(`add webhook server`)
+		// 	return err
+		// }
+	}
 
 	// pprof
 	if opts.PprofPort != 0 {
@@ -133,10 +134,50 @@ func Run(ctx context.Context, opts *options.Options) error {
 var controllers = make(controllerscontext.Initializers)
 
 func init() {
-	controllers["inplaceset"] = startInplaceSetController
+	controllers["exteneddeployment"] = startCibDeploymentController
+	controllers["placeset"] = startPlacesetController
+	controllers["deployregion"] = startDeployRegionController
 }
 
-func startInplaceSetController(ctx controllerscontext.Context) (enabled bool, err error) {
+func startCibDeploymentController(ctx controllerscontext.Context) (enabled bool, err error) {
+	mgr := ctx.Mgr
+
+	clusterController := &extendeddeployment.ExtendedDeploymentReconciler{
+		Client:               mgr.GetClient(),
+		KubeClient:           ctx.ClientSet,
+		Scheme:               mgr.GetScheme(),
+		EventRecorder:        mgr.GetEventRecorderFor(extendeddeployment.ControllerName),
+		DisableInplaceUpdate: ctx.Opts.DisableInplaceUpdate,
+	}
+	if err := clusterController.Setup(ctx.Informer); err != nil {
+		return false, err
+	}
+
+	if err := clusterController.SetupWithManager(mgr); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func startDeployRegionController(ctx controllerscontext.Context) (enabled bool, err error) {
+	mgr := ctx.Mgr
+	controller := &deployregion.DeployRegionReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}
+
+	if err := controller.Setup(ctx.StopChan, ctx.Informer); err != nil {
+		return false, err
+	}
+
+	if err := controller.SetupWithManager(mgr); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func startPlacesetController(ctx controllerscontext.Context) (enabled bool, err error) {
 	mgr := ctx.Mgr
 	ctrl := inplaceset.NewInplaceSetReconciler(
 		ctx.Opts.DisableInplaceUpdate,
