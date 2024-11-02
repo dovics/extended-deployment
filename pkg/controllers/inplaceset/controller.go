@@ -74,8 +74,8 @@ type InplaceSetReconciler struct {
 	// expectations *controller.UIDTrackingControllerExpectations
 }
 
-// +kubebuilder:rbac:groups=inplaceset.cib.io,resources=inplacesets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=inplaceset.cib.io,resources=inplacesets/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=extendeddeployment.io,resources=inplacesets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=extendeddeployment.io,resources=inplacesets/status,verbs=get;update;patch
 
 func (r *InplaceSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	klog.V(4).Infof("get reconcile req: %s", req.NamespacedName)

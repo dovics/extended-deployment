@@ -10,16 +10,16 @@ import (
 
 const (
 	// InplaceSet annotation
-	IpsAnnotationRegionName           = "cib.inplaceset.io/region-name"
-	IpsAnnotationTemplateHash         = "cib.inplaceset.io/template-hash"
-	IpsAnnotationInplacesetUpdateSpec = "cib.inplaceset.io/inplaceset-update-spec"
-	IpsAnnotationInplacesetStatus     = "cib.inplaceset.io/inplaceset-status"
-	IpsAnnotationConfigHash           = "cib.inplaceset.io/config-hash"
-	IpsAnnotationRollTerm             = "cib.inplaceset.io/roll-term"           // Rolling group number
-	IpsAnnotationFailedOldReplicas    = "cib.inplaceset.io/failed-old-replicas" // Historical replica count when failure occurs
-	IpsAnnotationDesiredReplicas      = "cib.inplaceset.io/desired-replicas"
-	IpsAnnotationRevision             = "cib.inplaceset.io/revision"
-	IpsAnnotationRegionFailed         = "cib.inplaceset.io/region-failed"
+	IpsAnnotationRegionName           = "extendeddeployment.io/region-name"
+	IpsAnnotationTemplateHash         = "extendeddeployment.io/template-hash"
+	IpsAnnotationInplacesetUpdateSpec = "extendeddeployment.io/inplaceset-update-spec"
+	IpsAnnotationInplacesetStatus     = "extendeddeployment.io/inplaceset-status"
+	IpsAnnotationConfigHash           = "extendeddeployment.io/config-hash"
+	IpsAnnotationRollTerm             = "extendeddeployment.io/roll-term"           // Rolling group number
+	IpsAnnotationFailedOldReplicas    = "extendeddeployment.io/failed-old-replicas" // Historical replica count when failure occurs
+	IpsAnnotationDesiredReplicas      = "extendeddeployment.io/desired-replicas"
+	IpsAnnotationRevision             = "extendeddeployment.io/revision"
+	IpsAnnotationRegionFailed         = "extendeddeployment.io/region-failed"
 )
 
 // InplaceSetUpdateSpec spec for controling inplace update, set in inplaceset's annotations
