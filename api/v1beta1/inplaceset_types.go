@@ -134,7 +134,7 @@ type InplaceUpdateStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.labelSelector
-// +kubebuilder:resource:shortName={cibips, is, ips}
+// +kubebuilder:resource:shortName={is, ips}
 // +kubebuilder:printcolumn:name="Desired",type="integer",JSONPath=".spec.replicas",description="Replicas is the most recently observed number of replicas."
 // +kubebuilder:printcolumn:name="Current",type="integer",JSONPath=".status.replicas",description="Replicas is the most recently observed number of replicas."
 // +kubebuilder:printcolumn:name="Ready",type="integer",JSONPath=".status.readyReplicas",description="readyReplicas is the number of pods targeted by this ReplicaSet with a Ready Condition."

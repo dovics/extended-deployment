@@ -9,17 +9,25 @@ import (
 )
 
 const (
+	// Deployment annotation
+	AnnotationRevision       = "deployment.extendeddeployment.io/revision"
+	AnnotationRollbackTo     = "deployment.extendeddeployment.io/rollback-to"
+	AnnotationFailedFlag     = "deployment.extendeddeployment.io/failed-flag"     // 不为空代表发生了故障，内容为故障分区，格式：region1,region2,...
+	AnnotationUpgradeConfirm = "deployment.extendeddeployment.io/upgrade-confirm" // 升级确认
+	AnnotationRollTerm       = "deployment.extendeddeployment.io/roll-term"       // 分组批次号
+	AnnotationReschedule     = "deployment.extendeddeployment.io/reschedule"      // 资源不足自动调度/故障调度 对期望副本数的修改
+
 	// InplaceSet annotation
-	IpsAnnotationRegionName           = "extendeddeployment.io/region-name"
-	IpsAnnotationTemplateHash         = "extendeddeployment.io/template-hash"
-	IpsAnnotationInplacesetUpdateSpec = "extendeddeployment.io/inplaceset-update-spec"
-	IpsAnnotationInplacesetStatus     = "extendeddeployment.io/inplaceset-status"
-	IpsAnnotationConfigHash           = "extendeddeployment.io/config-hash"
-	IpsAnnotationRollTerm             = "extendeddeployment.io/roll-term"           // Rolling group number
-	IpsAnnotationFailedOldReplicas    = "extendeddeployment.io/failed-old-replicas" // Historical replica count when failure occurs
-	IpsAnnotationDesiredReplicas      = "extendeddeployment.io/desired-replicas"
-	IpsAnnotationRevision             = "extendeddeployment.io/revision"
-	IpsAnnotationRegionFailed         = "extendeddeployment.io/region-failed"
+	IpsAnnotationRegionName           = "inplaceset.extendeddeployment.io/region-name"
+	IpsAnnotationTemplateHash         = "inplaceset.extendeddeployment.io/template-hash"
+	IpsAnnotationInplacesetUpdateSpec = "inplaceset.extendeddeployment.io/inplaceset-update-spec"
+	IpsAnnotationInplacesetStatus     = "inplaceset.extendeddeployment.io/inplaceset-status"
+	IpsAnnotationConfigHash           = "inplaceset.extendeddeployment.io/config-hash"
+	IpsAnnotationRollTerm             = "inplaceset.extendeddeployment.io/roll-term"           // Rolling group number
+	IpsAnnotationFailedOldReplicas    = "inplaceset.extendeddeployment.io/failed-old-replicas" // Historical replica count when failure occurs
+	IpsAnnotationDesiredReplicas      = "inplaceset.extendeddeployment.io/desired-replicas"
+	IpsAnnotationRevision             = "inplaceset.extendeddeployment.io/revision"
+	IpsAnnotationRegionFailed         = "inplaceset.extendeddeployment.io/region-failed"
 )
 
 // InplaceSetUpdateSpec spec for controling inplace update, set in inplaceset's annotations
