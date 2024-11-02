@@ -189,14 +189,14 @@ func SetDeploymentAnnotationsTo(deployment *v1beta1.ExtendedDeployment, rollback
 	}
 }
 
-func QueryCibDeployment(c client.Client, ctx context.Context, key types.NamespacedName) (*v1beta1.ExtendedDeployment, error) {
+func QueryExtendedDeployment(c client.Client, ctx context.Context, key types.NamespacedName) (*v1beta1.ExtendedDeployment, error) {
 	ret := &v1beta1.ExtendedDeployment{}
 	err := c.Get(ctx, key, ret)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil, nil
 		}
-		klog.Errorf("CibDeployment query %v error: %v", key.String(), err)
+		klog.Errorf("ExtendedDeployment query %v error: %v", key.String(), err)
 		return nil, err
 	}
 

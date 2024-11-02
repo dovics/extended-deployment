@@ -19,14 +19,14 @@ const (
 	regionResumeRate  = 0.0 // 没有失败，认为故障恢复
 )
 
-func (d *syncContext) QueryCibDeploymentsInRegion(regionName string) (cibdMap map[string]types.NamespacedName) {
-	// 对当前分区下的 CibDeployment 进行操作
+func (d *syncContext) QueryExtendedDeploymentsInRegion(regionName string) map[string]types.NamespacedName {
+	// 对当前分区下的 ExtendedDeployment 进行操作
 	inplacesets, err := d.controller.QueryInplaceSetsInRegion(d.ctx, regionName)
 	if err != nil {
 		stopReconcile(err)
 	}
 
-	cibdMap = map[string]types.NamespacedName{}
+	deployMap := map[string]types.NamespacedName{}
 	for i := range inplacesets.Items {
 		ips := &inplacesets.Items[i]
 		if len(ips.OwnerReferences) == 0 {
@@ -39,10 +39,10 @@ func (d *syncContext) QueryCibDeploymentsInRegion(regionName string) (cibdMap ma
 			Namespace: ips.Namespace,
 			Name:      ips.OwnerReferences[0].Name,
 		}
-		cibdMap[key.String()] = key
+		deployMap[key.String()] = key
 	}
 
-	return
+	return deployMap
 }
 
 func (d *syncContext) CheckRegionStatus(regionName string) {
@@ -67,19 +67,19 @@ func (d *syncContext) CheckRegionStatus(regionName string) {
 		return
 	}
 
-	cibdMap := d.QueryCibDeploymentsInRegion(regionName)
-	for _, key := range cibdMap {
-		cibd, err := utils.QueryCibDeployment(d.controller.Client, d.ctx, key)
+	deployMap := d.QueryExtendedDeploymentsInRegion(regionName)
+	for _, key := range deployMap {
+		deploy, err := utils.QueryExtendedDeployment(d.controller.Client, d.ctx, key)
 		if err != nil {
 			stopReconcile(err)
 		}
-		if cibd == nil {
+		if deploy == nil {
 			continue
 		}
 
-		// 找到该 CibDeployment 故障的分区列表
+		// 找到该 ExtendedDeployment 故障的分区列表
 		failedRegions := make([]string, 0)
-		for _, region := range cibd.Spec.Regions {
+		for _, region := range deploy.Spec.Regions {
 			tempStatus := regionStatusUnknown
 			if region.Name == regionName {
 				tempStatus = newStatus
@@ -91,10 +91,10 @@ func (d *syncContext) CheckRegionStatus(regionName string) {
 			}
 		}
 
-		if IsCibDeploymentProgressFinished(cibd) {
-			// 设置故障注解，由 CibDeployment controller 去做调解
-			// 注：此分区的故障恢复，并不表示该 CibDeployment 就没有分区故障了
-			err = d.setFailureAnnotation(cibd, failedRegions)
+		if IsExtendedDeploymentProgressFinished(deploy) {
+			// 设置故障注解，由 ExtendedDeployment controller 去做调解
+			// 注：此分区的故障恢复，并不表示该 ExtendedDeployment 就没有分区故障了
+			err = d.setFailureAnnotation(deploy, failedRegions)
 			if err != nil {
 				stopReconcile(err)
 			}
@@ -104,31 +104,31 @@ func (d *syncContext) CheckRegionStatus(regionName string) {
 	regionInfo.status = newStatus
 }
 
-func (d *syncContext) setFailureAnnotation(cibd *v1beta1.ExtendedDeployment, failedRegions []string) error {
+func (d *syncContext) setFailureAnnotation(deploy *v1beta1.ExtendedDeployment, failedRegions []string) error {
 	if len(failedRegions) == 0 { // 故障恢复
-		if _, ok := cibd.Annotations[utils.AnnotationFailedFlag]; !ok {
+		if _, ok := deploy.Annotations[utils.AnnotationFailedFlag]; !ok {
 			return nil
 		}
-		delete(cibd.Annotations, utils.AnnotationFailedFlag)
-		return d.controller.Update(d.ctx, cibd)
+		delete(deploy.Annotations, utils.AnnotationFailedFlag)
+		return d.controller.Update(d.ctx, deploy)
 	}
 
 	// 设置故障
 	sort.Strings(failedRegions)
 	value := strings.Join(failedRegions, ",")
-	if cibd.Annotations == nil {
-		cibd.Annotations = map[string]string{}
+	if deploy.Annotations == nil {
+		deploy.Annotations = map[string]string{}
 	}
-	curValue, _ := cibd.Annotations[utils.AnnotationFailedFlag]
+	curValue, _ := deploy.Annotations[utils.AnnotationFailedFlag]
 	if value == curValue {
 		return nil
 	}
 
-	cibd.Annotations[utils.AnnotationFailedFlag] = value
-	return d.controller.Update(d.ctx, cibd)
+	deploy.Annotations[utils.AnnotationFailedFlag] = value
+	return d.controller.Update(d.ctx, deploy)
 }
 
-func IsCibDeploymentProgressFinished(deployment *v1beta1.ExtendedDeployment) bool {
+func IsExtendedDeploymentProgressFinished(deployment *v1beta1.ExtendedDeployment) bool {
 	var isStatusConditionOk bool
 	for _, condition := range deployment.Status.Conditions {
 		if condition.Type == appsv1.DeploymentProgressing &&

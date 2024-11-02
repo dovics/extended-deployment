@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strconv"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/klog/v2"
 )
@@ -38,6 +40,101 @@ type InplaceSetUpdateSpec struct {
 	UpdatePodNum int `json:"updatePodNum"`
 	// update generation
 	PodTemplateHash string `json:"podTemplateHash"`
+}
+
+type ScheduleReplicas struct {
+	Config   int32 `json:"config"`   // 配置期望副本数
+	Schedule int32 `json:"schedule"` // 转移副本数，>0：转入； <0：转出
+}
+
+type AutoScheduleSpec struct {
+	Generation    int64                        `json:"generation"`    // 转移时的版本号
+	FailureRegion string                       `json:"failureRegion"` // 故障调度时，设置的故障分区
+	Infos         map[string]*ScheduleReplicas `json:"infos"`
+}
+
+func (r *ScheduleReplicas) DesiredReplicas() int32 {
+	return r.Config + r.Schedule
+}
+
+func GetFailedFlag(obj metav1.Object) (string, bool) {
+	anno := obj.GetAnnotations()
+	if anno == nil {
+		return "", false
+	}
+	str, ok := anno[AnnotationFailedFlag]
+	if !ok {
+		return "", false
+	}
+
+	return str, true
+}
+
+func RevisionToInt64(obj metav1.Object) (int64, error) {
+	v, ok := obj.GetAnnotations()[AnnotationRevision]
+	if !ok {
+		return 0, nil
+	}
+	return strconv.ParseInt(v, 10, 64)
+}
+
+func HaveAutoScheduleSpec(obj metav1.Object) bool {
+	anno := obj.GetAnnotations()
+	if anno == nil {
+		return false
+	}
+
+	_, ok := anno[AnnotationReschedule]
+	return ok
+}
+
+func GetAutoScheduleSpec(obj metav1.Object) (*AutoScheduleSpec, error) {
+	anno := obj.GetAnnotations()
+	if anno == nil {
+		return nil, nil
+	}
+	specStr, ok := anno[AnnotationReschedule]
+	if !ok {
+		return nil, nil
+	}
+
+	spec := &AutoScheduleSpec{
+		Infos: map[string]*ScheduleReplicas{},
+	}
+
+	if err := json.Unmarshal([]byte(specStr), spec); err != nil {
+		return nil, err
+	}
+	return spec, nil
+}
+
+func SetAutoScheduleSpec(obj metav1.Object, spec *AutoScheduleSpec) error {
+	b, err := json.Marshal(spec)
+	if err != nil {
+		return err
+	}
+	annotations := obj.GetAnnotations()
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
+	annotations[AnnotationReschedule] = string(b)
+	obj.SetAnnotations(annotations)
+	return nil
+}
+
+func DelAutoScheduleSpec(obj metav1.Object) bool {
+	annotations := obj.GetAnnotations()
+	if annotations == nil {
+		return false
+	}
+
+	if _, ok := annotations[AnnotationReschedule]; ok {
+		delete(annotations, AnnotationReschedule)
+		obj.SetAnnotations(annotations)
+		return true
+	}
+	return false
 }
 
 func GetInplaceSetUpdateSpec(annotations map[string]string) (*InplaceSetUpdateSpec, bool, error) {

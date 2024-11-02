@@ -44,8 +44,7 @@ func runControllerManagerCmd() error {
 	logs.InitLogs()
 	defer logs.FlushLogs()
 
-	ctx := SetupSignalContext()
-	if err := app.NewControllerManagerCommand(ctx).Execute(); err != nil {
+	if err := app.NewControllerManagerCommand().Execute(); err != nil {
 		return err
 	}
 
