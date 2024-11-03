@@ -2,6 +2,7 @@ package deployregion
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"runtime/debug"
 	"strings"
@@ -38,7 +39,7 @@ func stopReconcile(err error) {
 			errmsg: err.Error(),
 		})
 	}
-	panic(nil)
+	panic(errors.New(("stopReconcile")))
 }
 
 func (d *syncContext) handlePodEvent() {
@@ -60,7 +61,7 @@ func (d *syncContext) handlePodEvent() {
 	}
 
 	region := d.Cache.Regions[regionName]
-	nodeInfo, _ := region.Nodes[nodeName]
+	nodeInfo := region.Nodes[nodeName]
 	nodeInfo.OnPodUpdate(pod)
 }
 

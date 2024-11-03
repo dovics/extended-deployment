@@ -26,6 +26,7 @@ import (
 	"extendeddeployment.io/extended-deployment/pkg/controllers/deployregion"
 	"extendeddeployment.io/extended-deployment/pkg/controllers/extendeddeployment"
 	"extendeddeployment.io/extended-deployment/pkg/controllers/inplaceset"
+	"extendeddeployment.io/extended-deployment/pkg/controllers/reschedule"
 	"extendeddeployment.io/extended-deployment/pkg/sharedcli/klogflag"
 	"extendeddeployment.io/extended-deployment/pkg/utils/gclient"
 	"extendeddeployment.io/extended-deployment/pkg/utils/informermanager"
@@ -138,6 +139,7 @@ func init() {
 	controllers["exteneddeployment"] = startExtendedDeploymentController
 	controllers["placeset"] = startPlacesetController
 	controllers["deployregion"] = startDeployRegionController
+	controllers["reschedule"] = startRescheduleController
 }
 
 func startExtendedDeploymentController(ctx controllerscontext.Context) (enabled bool, err error) {
@@ -187,6 +189,25 @@ func startPlacesetController(ctx controllerscontext.Context) (enabled bool, err 
 	if err := ctrl.SetupWithManager(mgr); err != nil {
 		return false, err
 	}
+	return true, nil
+}
+
+func startRescheduleController(ctx controllerscontext.Context) (enabled bool, err error) {
+	mgr := ctx.Mgr
+	controller := &reschedule.RescheduleReconciler{
+		Client:        mgr.GetClient(),
+		Scheme:        mgr.GetScheme(),
+		EventRecorder: mgr.GetEventRecorderFor(extendeddeployment.ControllerName),
+	}
+
+	if err := controller.Setup(ctx.StopChan, ctx.Informer); err != nil {
+		return false, err
+	}
+
+	if err := controller.SetupWithManager(mgr); err != nil {
+		return false, err
+	}
+
 	return true, nil
 }
 

@@ -97,7 +97,6 @@ func setDefaultsForExtendedDeployment(obj *v1beta1.ExtendedDeployment) {
 		obj.Spec.Template.Spec.ReadinessGates = append(obj.Spec.Template.Spec.ReadinessGates,
 			corev1.PodReadinessGate{ConditionType: v1beta1.InPlaceUpdateReady})
 	}
-	return
 }
 
 // setDefaultsForInPlaceSet
@@ -107,6 +106,4 @@ func setDefaultsForInPlaceSet(obj *v1beta1.InplaceSet) {
 		obj.Spec.Template.Spec.ReadinessGates = append(obj.Spec.Template.Spec.ReadinessGates,
 			corev1.PodReadinessGate{ConditionType: v1beta1.InPlaceUpdateReady})
 	}
-
-	return
 }

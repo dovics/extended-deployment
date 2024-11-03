@@ -119,7 +119,7 @@ func (d *syncContext) setFailureAnnotation(deploy *v1beta1.ExtendedDeployment, f
 	if deploy.Annotations == nil {
 		deploy.Annotations = map[string]string{}
 	}
-	curValue, _ := deploy.Annotations[utils.AnnotationFailedFlag]
+	curValue := deploy.Annotations[utils.AnnotationFailedFlag]
 	if value == curValue {
 		return nil
 	}

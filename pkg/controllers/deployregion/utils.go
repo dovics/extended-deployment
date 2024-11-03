@@ -5,11 +5,7 @@ func IsSynced() bool {
 }
 
 func IsRegionFailed(regionName string) bool {
-	if gCache.Regions[regionName].status == regionStatusFailed {
-		return true
-	}
-
-	return false
+	return gCache.Regions[regionName].status == regionStatusFailed
 }
 
 func GetRegionAllocatablePodNum(region string, res *Resource) (podNum int64) {

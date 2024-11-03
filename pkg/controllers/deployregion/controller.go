@@ -159,6 +159,9 @@ func (r *DeployRegionReconciler) QueryAllNode(ctx context.Context) (nodes *corev
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: r.nodeLabels,
 	})
+	if err != nil {
+		return nil, err
+	}
 	nodes = &corev1.NodeList{}
 	err = r.List(ctx, nodes, &client.ListOptions{
 		LabelSelector: selector,
@@ -228,6 +231,9 @@ func (r *DeployRegionReconciler) QueryInplaceSetsInRegion(ctx context.Context,
 	selector, err := metav1.LabelSelectorAsSelector(&metav1.LabelSelector{
 		MatchLabels: map[string]string{utils.RegionLabel: region},
 	})
+	if err != nil {
+		return nil, err
+	}
 	ips = &v1beta1.InplaceSetList{}
 	err = r.List(ctx, ips, &client.ListOptions{
 		LabelSelector: selector,
