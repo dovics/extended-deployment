@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
 )
 
 type CrInfo struct {

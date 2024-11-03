@@ -1,4 +1,4 @@
-module extendeddeployment.io/extended-deployment
+module github.com/dovics/extendeddeployment
 
 go 1.22.0
 

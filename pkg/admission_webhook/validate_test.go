@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/kubernetes/pkg/api/legacyscheme"
 )

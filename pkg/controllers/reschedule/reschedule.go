@@ -7,10 +7,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog/v2"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
-	"extendeddeployment.io/extended-deployment/pkg/controllers/deployregion"
-	"extendeddeployment.io/extended-deployment/pkg/controllers/extendeddeployment"
-	"extendeddeployment.io/extended-deployment/pkg/utils"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/pkg/controllers/deployregion"
+	"github.com/dovics/extendeddeployment/pkg/controllers/extendeddeployment"
+	"github.com/dovics/extendeddeployment/pkg/utils"
 )
 
 const (
@@ -21,8 +21,6 @@ const (
 type ScheduleInfo struct {
 	regionsInfo   map[string]*scheduleRegionInfo
 	failedRegions []string
-
-	err error
 }
 
 type scheduleRegionInfo struct {
@@ -92,7 +90,7 @@ func (info ScheduleInfo) RescheduleFailedRegions(regionsMap map[string]bool) err
 	 * 4. 逐个将待转移副本填入最优分区，每次转入后分区资源降低
 	 * 5. 得到转移的数据，将转移数据以注解形式写入
 	 */
-	if regionsMap == nil || len(regionsMap) == 0 {
+	if len(regionsMap) == 0 {
 		return nil
 	}
 

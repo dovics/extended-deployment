@@ -11,8 +11,8 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/controller/history"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
-	"extendeddeployment.io/extended-deployment/pkg/utils"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/pkg/utils"
 )
 
 func getSpecByRevision(r *appsv1.ControllerRevision) (*v1beta1.ExtendedDeploymentSpec, error) {

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"extendeddeployment.io/extended-deployment/pkg/utils"
+	"github.com/dovics/extendeddeployment/pkg/utils"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"

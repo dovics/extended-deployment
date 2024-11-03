@@ -15,8 +15,8 @@ import (
 	"k8s.io/klog/v2"
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
-	"extendeddeployment.io/extended-deployment/pkg/utils"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/pkg/utils"
 )
 
 var (

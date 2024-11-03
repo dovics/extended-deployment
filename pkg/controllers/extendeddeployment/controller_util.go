@@ -8,8 +8,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"extendeddeployment.io/extended-deployment/pkg/controllers/extendeddeployment/adapter"
-	"extendeddeployment.io/extended-deployment/pkg/utils"
+	"github.com/dovics/extendeddeployment/pkg/controllers/extendeddeployment/adapter"
+	"github.com/dovics/extendeddeployment/pkg/utils"
 )
 
 // 获取Subset分区名称

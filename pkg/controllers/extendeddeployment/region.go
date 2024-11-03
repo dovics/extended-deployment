@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/klog/v2"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
 )
 
 func (dc *ExtendedDeploymentReconciler) checkRegions(ctx context.Context, deploy *v1beta1.ExtendedDeployment, key string) (map[string]*v1beta1.DeployRegion, error) {

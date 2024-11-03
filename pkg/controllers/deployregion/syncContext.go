@@ -11,7 +11,7 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
 )
 
 type syncContext struct {

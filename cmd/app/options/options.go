@@ -7,7 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"extendeddeployment.io/extended-deployment/pkg/sharedcli/ratelimiterflag"
+	"github.com/dovics/extendeddeployment/pkg/sharedcli/ratelimiterflag"
 )
 
 const (

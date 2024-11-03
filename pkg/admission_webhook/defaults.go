@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
 )
 
 func init() {

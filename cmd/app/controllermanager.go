@@ -20,17 +20,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"extendeddeployment.io/extended-deployment/cmd/app/options"
-	"extendeddeployment.io/extended-deployment/pkg/admission_webhook"
-	controllerscontext "extendeddeployment.io/extended-deployment/pkg/controllers/context"
-	"extendeddeployment.io/extended-deployment/pkg/controllers/deployregion"
-	"extendeddeployment.io/extended-deployment/pkg/controllers/extendeddeployment"
-	"extendeddeployment.io/extended-deployment/pkg/controllers/inplaceset"
-	"extendeddeployment.io/extended-deployment/pkg/controllers/reschedule"
-	"extendeddeployment.io/extended-deployment/pkg/sharedcli/klogflag"
-	"extendeddeployment.io/extended-deployment/pkg/utils/gclient"
-	"extendeddeployment.io/extended-deployment/pkg/utils/informermanager"
-	"extendeddeployment.io/extended-deployment/pkg/version"
+	"github.com/dovics/extendeddeployment/cmd/app/options"
+	"github.com/dovics/extendeddeployment/pkg/admission_webhook"
+	controllerscontext "github.com/dovics/extendeddeployment/pkg/controllers/context"
+	"github.com/dovics/extendeddeployment/pkg/controllers/deployregion"
+	"github.com/dovics/extendeddeployment/pkg/controllers/extendeddeployment"
+	"github.com/dovics/extendeddeployment/pkg/controllers/inplaceset"
+	"github.com/dovics/extendeddeployment/pkg/controllers/reschedule"
+	"github.com/dovics/extendeddeployment/pkg/sharedcli/klogflag"
+	"github.com/dovics/extendeddeployment/pkg/utils/gclient"
+	"github.com/dovics/extendeddeployment/pkg/utils/informermanager"
+	"github.com/dovics/extendeddeployment/pkg/version"
 )
 
 func NewControllerManagerCommand(ctx context.Context) *cobra.Command {

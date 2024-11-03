@@ -31,8 +31,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
-	"extendeddeployment.io/extended-deployment/pkg/utils"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/pkg/utils"
 )
 
 const (

@@ -17,7 +17,7 @@ import (
 
 	_ "k8s.io/kubernetes/pkg/apis/apps/install" // 必须有，保证schema注册
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
 )
 
 func init() {

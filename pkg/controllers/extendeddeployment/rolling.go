@@ -7,8 +7,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/klog/v2"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
-	"extendeddeployment.io/extended-deployment/pkg/controllers/extendeddeployment/adapter"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/pkg/controllers/extendeddeployment/adapter"
 )
 
 func (m *SubsetControl) reconcileNewSubset(cd *v1beta1.ExtendedDeployment, allRSs []*adapter.Subset, newRS *adapter.Subset, region *adapter.RegionInfo) (bool, error) {

@@ -25,7 +25,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"extendeddeployment.io/extended-deployment/test/utils"
+	"github.com/dovics/extendeddeployment/test/utils"
 )
 
 var (

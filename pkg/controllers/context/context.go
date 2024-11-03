@@ -8,8 +8,8 @@ import (
 	"k8s.io/klog/v2"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 
-	"extendeddeployment.io/extended-deployment/cmd/app/options"
-	"extendeddeployment.io/extended-deployment/pkg/utils/informermanager"
+	"github.com/dovics/extendeddeployment/cmd/app/options"
+	"github.com/dovics/extendeddeployment/pkg/utils/informermanager"
 )
 
 // Context defines the context object for controller.

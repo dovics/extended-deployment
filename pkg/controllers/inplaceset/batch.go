@@ -3,8 +3,8 @@ package inplaceset
 import (
 	"time"
 
-	"extendeddeployment.io/extended-deployment/api/v1beta1"
-	"extendeddeployment.io/extended-deployment/pkg/utils"
+	"github.com/dovics/extendeddeployment/api/v1beta1"
+	"github.com/dovics/extendeddeployment/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/klog/v2"
 )
