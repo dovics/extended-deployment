@@ -38,7 +38,7 @@ type DeployRegionStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:shortName=region,dr,scope=Cluster
+// +kubebuilder:resource:shortName=region,shortName=dr,scope=Cluster
 
 // DeployRegion is the Schema for the deployregions API
 type DeployRegion struct {

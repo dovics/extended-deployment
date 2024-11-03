@@ -1,12 +1,12 @@
 # Adds namespace to all resources.
-namespace: extended-deployment-system
+namespace: extended-system
 
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
 # "wordpress" becomes "alices-wordpress".
 # Note that it should also match with the prefix (text before '-') of the namespace
 # field above.
-namePrefix: extended-deployment-
+namePrefix: extended-
 
 # Labels to add to all resources and selectors.
 #labels:
@@ -34,12 +34,12 @@ resources:
 #- ../network-policy
 
 # Uncomment the patches line if you enable Metrics, and/or are using webhooks and cert-manager
-patches:
-# [METRICS] The following patch will enable the metrics endpoint using HTTPS and the port :8443.
-# More info: https://book.kubebuilder.io/reference/metrics
-- path: manager_metrics_patch.yaml
-  target:
-    kind: Deployment
+# patches:
+# # [METRICS] The following patch will enable the metrics endpoint using HTTPS and the port :8443.
+# # More info: https://book.kubebuilder.io/reference/metrics
+# - path: manager_metrics_patch.yaml
+#   target:
+#     kind: Deployment
 
 # [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix including the one in
 # crd/kustomization.yaml

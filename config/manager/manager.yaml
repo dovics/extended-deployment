@@ -61,8 +61,11 @@ spec:
       - command:
         - /manager
         args:
-          - --leader-elect
-          - --health-probe-bind-address=:8081
+          - --pprof-port=12712
+          - --v=4
+          - --disable-inplace-update=false
+          - --leader-elect=true
+          - --disable-webhook=true
         image: controller:latest
         name: manager
         securityContext:

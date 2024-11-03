@@ -1,5 +1,9 @@
+GIT_VERSION=$(shell git describe --tags --dirty --match="v*" || true)
+ifeq ($(GIT_VERSION),)
+  GIT_VERSION := $(shell git rev-parse --short=7 HEAD)
+endif
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= extendedployment/controller:${GIT_VERSION}
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.31.0
 

@@ -1,0 +1,394 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.4
+  name: extendeddeployments.extendeddeployment.io
+spec:
+  group: extendeddeployment.io
+  names:
+    kind: ExtendedDeployment
+    listKind: ExtendedDeploymentList
+    plural: extendeddeployments
+    shortNames:
+    - extendeddeploy
+    - ed
+    singular: extendeddeployment
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: 'Overview is a string that describe all regions information, the
+        format is "RegionName1: ActualReplicas/DesiredReplicas"'
+      jsonPath: .status.overview
+      name: RegionOverview
+      type: string
+    - description: CreationTimestamp is a timestamp representing the server time when
+        this object was created. It is not guaranteed to be set in happens-before
+        order across separate operations. Clients may not set this value. It is represented
+        in RFC3339 form and is in UTC.
+      jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: ExtendedDeployment is the Schema for the extendeddeployments
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ExtendedDeploymentSpec defines the desired state of ExtendedDeployment.
+            properties:
+              historyLimit:
+                default: 5
+                description: The number of historical Subset records to be saved.
+                format: int32
+                minimum: 0
+                type: integer
+              overriders:
+                description: The partition override.
+                items:
+                  description: |-
+                    Overriders offers various alternatives to represent the override rules.
+
+                    If more than one alternatives exist, they will be applied with following order:
+                    - ImageOverrider
+                    - Plaintext
+                  properties:
+                    name:
+                      description: Region name
+                      type: string
+                    overriders:
+                      description: Plaintext represents override rules defined with
+                        plaintext overriders.
+                      items:
+                        description: |-
+                          PlaintextOverrider is a simple overrider that overrides target fields
+                          according to path, operator and value.
+                        properties:
+                          op:
+                            description: |-
+                              Operator indicates the operation on target field.
+                              Available operators are: add, update and remove.
+                            enum:
+                            - add
+                            - remove
+                            - replace
+                            type: string
+                          path:
+                            description: Path indicates the path of target field
+                            minLength: 1
+                            type: string
+                          value:
+                            description: |-
+                              Value to be applied to target field.
+                              Must be empty when operator is Remove.
+                            x-kubernetes-preserve-unknown-fields: true
+                        required:
+                        - op
+                        - path
+                        type: object
+                      type: array
+                  type: object
+                type: array
+              regions:
+                description: The partition selection.
+                items:
+                  description: Placement represents the rule for select clusters.
+                  properties:
+                    name:
+                      description: Region name
+                      minLength: 1
+                      type: string
+                    replicas:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Expected replicas in the partition
+                      x-kubernetes-int-or-string: true
+                  required:
+                  - name
+                  type: object
+                type: array
+              replicas:
+                default: 0
+                description: The total number of replicas in the partition.
+                format: int32
+                minimum: 0
+                type: integer
+              selector:
+                description: The selector for matching Subset.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: |-
+                        A label selector requirement is a selector that contains values, a key, and an operator that
+                        relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: |-
+                            operator represents a key's relationship to a set of values.
+                            Valid operators are In, NotIn, Exists and DoesNotExist.
+                          type: string
+                        values:
+                          description: |-
+                            values is an array of string values. If the operator is In or NotIn,
+                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                            the values array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                      map is equivalent to an element of matchExpressions, whose key field is "key", the
+                      operator is "In", and the values array contains only "value". The requirements are ANDed.
+                    type: object
+                type: object
+                x-kubernetes-map-type: atomic
+              strategy:
+                description: The update strategy for extended-deployment.
+                properties:
+                  autoReschedule:
+                    description: Auto reschedule strategy for pods that are pending
+                      due to insufficient resources
+                    properties:
+                      enable:
+                        default: false
+                        type: boolean
+                      timeoutSeconds:
+                        default: 60
+                        minimum: 0
+                        type: integer
+                    type: object
+                  batchSize:
+                    default: 1
+                    description: 分组发布的步长控制
+                    format: int32
+                    minimum: 1
+                    type: integer
+                  minReadySeconds:
+                    default: 5
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  needFirstConfirm:
+                    default: false
+                    description: Whether to enable the first confirmation
+                    type: boolean
+                  needWaitingForConfirm:
+                    default: false
+                    description: Whether to wait for confirmation
+                    type: boolean
+                  pause:
+                    description: Update pause
+                    type: boolean
+                  rolloutStrategy:
+                    default: Beta
+                    description: Rollout strategy
+                    enum:
+                    - Beta
+                    - Group
+                    type: string
+                  syncWaitTimeout:
+                    default: 0
+                    description: Timeout for waiting for readiness
+                    format: int32
+                    type: integer
+                  updateStrategy:
+                    description: Upgrade strategy
+                    properties:
+                      gracePeriodSeconds:
+                        default: 5
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      rollingUpdate:
+                        description: Rolling update config params,Present only if
+                          UpdateStrategyType = "RollingUpdate"
+                        properties:
+                          maxSurge:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: |-
+                              The maximum number of pods that can be scheduled above the desired number of
+                              pods.
+                              Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
+                              This can not be 0 if MaxUnavailable is 0.
+                              Absolute number is calculated from percentage by rounding up.
+                              Defaults to 25%.
+                              Example: when this is set to 30%, the new ReplicaSet can be scaled up immediately when
+                              the rolling update starts, such that the total number of old and new pods do not exceed
+                              130% of desired pods. Once old pods have been killed,
+                              new ReplicaSet can be scaled up further, ensuring that total number of pods running
+                              at any time during the update is at most 130% of desired pods.
+                            x-kubernetes-int-or-string: true
+                          maxUnavailable:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            description: |-
+                              The maximum number of pods that can be unavailable during the update.
+                              Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
+                              Absolute number is calculated from percentage by rounding down.
+                              This can not be 0 if MaxSurge is 0.
+                              Defaults to 25%.
+                              Example: when this is set to 30%, the old ReplicaSet can be scaled down to 70% of desired pods
+                              immediately when the rolling update starts. Once new pods are ready, old ReplicaSet
+                              can be scaled down further, followed by scaling up the new ReplicaSet, ensuring
+                              that the total number of pods available at all times during the update is at
+                              least 70% of desired pods.
+                            x-kubernetes-int-or-string: true
+                        type: object
+                      type:
+                        default: ReCreate
+                        description: Update strategy
+                        enum:
+                        - DeleteAllFirst
+                        - ReCreate
+                        - RollingUpdate
+                        - InPlaceIfPossible
+                        type: string
+                    type: object
+                type: object
+              subsetType:
+                description: The type of associated resources.
+                type: string
+              template:
+                description: Template describes the pods that will be created.
+                x-kubernetes-preserve-unknown-fields: true
+            required:
+            - template
+            type: object
+          status:
+            description: ExtendedDeploymentStatus defines the observed state of ExtendedDeployment.
+            properties:
+              collisionCount:
+                description: |-
+                  Count of hash collisions for the Deployment. The Deployment controller uses this
+                  field as a collision avoidance mechanism when it needs to create the name for the
+                  newest ReplicaSet.
+                format: int32
+                type: integer
+              conditions:
+                description: Represents the latest available observations of a deployment's
+                  current state.
+                items:
+                  description: DeploymentCondition describes the state of a deployment
+                    at a certain point.
+                  properties:
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: The last time this condition was updated.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A human readable message indicating details about
+                        the transition.
+                      type: string
+                    reason:
+                      description: The reason for the condition's last transition.
+                      type: string
+                    status:
+                      description: Status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: Type of deployment condition.
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              labelSelector:
+                type: string
+              lastTermStartTime:
+                description: Last term start time
+                type: string
+              overview:
+                description: 'Region overview, format: regionName: availableReplicas/desiredReplicas'
+                type: string
+              regions:
+                items:
+                  properties:
+                    availableReplicas:
+                      description: Total number of available pods (ready for at least
+                        minReadySeconds) targeted by this deployment.
+                      format: int32
+                      type: integer
+                    readyReplicas:
+                      description: readyReplicas is the number of pods targeted by
+                        this Deployment with a Ready Condition.
+                      format: int32
+                      type: integer
+                    region:
+                      type: string
+                    replicas:
+                      description: Total number of replicas in the region.
+                      format: int32
+                      type: integer
+                    unavailableReplicas:
+                      description: |-
+                        Total number of unavailable pods targeted by this deployment. This is the total number of
+                        pods that are still required for the deployment to have 100% available capacity. They may
+                        either be pods that are running but not yet available or pods that still have not been created.
+                      format: int32
+                      type: integer
+                    updatedReplicas:
+                      description: Total number of non-terminated pods targeted by
+                        this deployment that have the desired template spec.
+                      format: int32
+                      type: integer
+                  type: object
+                type: array
+              replicas:
+                format: int32
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      scale:
+        labelSelectorPath: .status.labelSelector
+        specReplicasPath: .spec.replicas
+        statusReplicasPath: .status.replicas
+      status: {}

@@ -3,19 +3,8 @@ FROM golang:1.22 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
+COPY . /workspace/
 WORKDIR /workspace
-# Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum go.sum
-# cache deps before building and copying source so that we don't need to re-download as much
-# and so that source changes don't invalidate our downloaded layer
-RUN go mod download
-
-# Copy the go source
-COPY cmd/ cmd/
-COPY pkg/ pkg/
-COPY api/ api/
-
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command
 # was called. For example, if we call make docker-build in a local env which has the Apple Silicon M1 SO
