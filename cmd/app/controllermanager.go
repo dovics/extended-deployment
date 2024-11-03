@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"extendeddeployment.io/extended-deployment/cmd/app/options"
+	"extendeddeployment.io/extended-deployment/pkg/admission_webhook"
 	controllerscontext "extendeddeployment.io/extended-deployment/pkg/controllers/context"
 	"extendeddeployment.io/extended-deployment/pkg/controllers/deployregion"
 	"extendeddeployment.io/extended-deployment/pkg/controllers/extendeddeployment"
@@ -102,10 +103,10 @@ func Run(ctx context.Context, opts *options.Options) error {
 
 	// webhook
 	if !opts.DisableWebhook {
-		// if err := controllerManager.Add(admission_webhook.NewHookServer(opts.CertsDir, opts.WebhookPort)); err != nil {
-		// 	klog.Errorf(`add webhook server`)
-		// 	return err
-		// }
+		if err := controllerManager.Add(admission_webhook.NewHookServer(opts.CertsDir, opts.WebhookPort)); err != nil {
+			klog.Errorf(`add webhook server`)
+			return err
+		}
 	}
 
 	// pprof
@@ -134,12 +135,12 @@ func Run(ctx context.Context, opts *options.Options) error {
 var controllers = make(controllerscontext.Initializers)
 
 func init() {
-	controllers["exteneddeployment"] = startCibDeploymentController
+	controllers["exteneddeployment"] = startExtendedDeploymentController
 	controllers["placeset"] = startPlacesetController
 	controllers["deployregion"] = startDeployRegionController
 }
 
-func startCibDeploymentController(ctx controllerscontext.Context) (enabled bool, err error) {
+func startExtendedDeploymentController(ctx controllerscontext.Context) (enabled bool, err error) {
 	mgr := ctx.Mgr
 
 	clusterController := &extendeddeployment.ExtendedDeploymentReconciler{
