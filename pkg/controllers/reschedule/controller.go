@@ -76,7 +76,7 @@ func (r *RescheduleReconciler) reconcile(req ctrl.Request) error {
 		return nil
 	}
 
-	if !deploymentObject.Spec.Strategy.AutoReschedule.Enable {
+	if deploymentObject.Spec.Strategy.AutoReschedule == nil || !deploymentObject.Spec.Strategy.AutoReschedule.Enable {
 		klog.V(4).Infof("[Reschedule] ExtendedDeployment %v auto reschedule feature isn't enable", req.NamespacedName)
 		if utils.DelAutoScheduleSpec(deploymentObject) {
 			if err := r.Update(ctx, deploymentObject); err != nil {

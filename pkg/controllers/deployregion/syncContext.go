@@ -2,7 +2,6 @@ package deployregion
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"runtime/debug"
 	"strings"
@@ -39,7 +38,6 @@ func stopReconcile(err error) {
 			errmsg: err.Error(),
 		})
 	}
-	panic(errors.New(("stopReconcile")))
 }
 
 func (d *syncContext) handlePodEvent() {
@@ -48,6 +46,7 @@ func (d *syncContext) handlePodEvent() {
 	pod, err := d.controller.QueryPod(d.ctx, d.namespace, d.name)
 	if err != nil || pod == nil {
 		stopReconcile(err)
+		return
 	}
 
 	nodeName := pod.Spec.NodeName

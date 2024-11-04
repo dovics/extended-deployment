@@ -6,4 +6,40 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: extendeddeployment-sample
 spec:
-  # TODO(user): Add fields here
+  historyLimit: 10
+  selector:
+    matchLabels:
+      app: test
+  strategy:
+    batchSize: 2
+    minReadySeconds: 10
+    needWaitingForConfirm: false
+    rolloutStrategy: Beta
+    updateStrategy: 
+      gracePeriodSeconds: 1
+      type: ReCreate
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      #如果设置了readinessGates，则会在原地升级期间将pod设置为notReady状态，负载均衡会移除掉该状态的pod
+      readinessGates:
+        - conditionType: InPlaceUpdateReady
+      containers:
+        - image: alpine
+          imagePullPolicy: IfNotPresent
+          name: contaner1
+          command: [ 'sh','-c','sleep 100000' ]
+          resources: { }
+  regions:
+    - name: region1
+      replicas: 3
+    - name: region2
+      replicas: 4
+  overriders:
+    - name: region1
+      overriders:
+        - path: /spec/containers/0/image
+          op: replace
+          value: busybox
