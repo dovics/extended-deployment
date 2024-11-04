@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: extendedployment/controller
-  newTag: v0.0.1-dirty
+  newTag: v0.0.1-1-ga05ba05-dirty

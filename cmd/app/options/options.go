@@ -19,7 +19,7 @@ const (
 	defaultRetryPeriod   = 2 * time.Second
 
 	defaultLeaseID        = "exteneddeployment"
-	defaultLeaseNamespace = "extened-system"
+	defaultLeaseNamespace = "extended-system"
 )
 
 // Options contains everything necessary to create and run controller-manager.

@@ -30,7 +30,7 @@ import (
 const (
 	confirmTrue    = "true"
 	confirmFalse   = "false"
-	ControllerName = "cluster-controller"
+	ControllerName = "extendeddeployment-controller"
 	BetaStepSize   = 1
 )
 
@@ -133,6 +133,7 @@ func (dc *ExtendedDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error
 
 // +kubebuilder:rbac:groups=extendeddeployment.io,resources=extendeddeployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=extendeddeployment.io,resources=extendeddeployments/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=*,resources=*,verbs=get;watch;list;create;update;delete;patch
 
 // Reconcile reconcile
 func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
@@ -176,7 +177,7 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 		klog.Errorf("%s sync revision error: %s", key, err.Error())
 		return ctrl.Result{}, err
 	}
-	klog.V(4).Infof("%s start syncRevisions, type %s ,needSyncRevison %s ", key, deploy.Spec.SubsetType, needSyncRevison)
+	klog.V(4).Infof("%s start syncRevisions, type %s ,needSyncRevison %t ", key, deploy.Spec.SubsetType, needSyncRevison)
 	if needSyncRevison {
 		return ctrl.Result{}, nil
 	}
@@ -280,7 +281,7 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{RequeueAfter: 1 * time.Second}, err
 	}
 
-	klog.V(4).Infof("%s start sync status with refreshing time, updated:%s,", key, updated)
+	klog.V(4).Infof("%s start sync status with refreshing time, updated:%t,", key, updated)
 
 	err = dc.SyncStatusOnly(ctx, deploy, regionInfos, true, false)
 	if err != nil {

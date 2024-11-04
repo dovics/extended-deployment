@@ -26,6 +26,10 @@ import (
 	"github.com/dovics/extendeddeployment/pkg/utils"
 )
 
+const (
+	ControllerName = "reschedule-controller"
+)
+
 // RescheduleReconciler reconciles a DeployRegion object
 type RescheduleReconciler struct {
 	client.Client
@@ -218,6 +222,7 @@ func (r *RescheduleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			For(&v1beta1.ExtendedDeployment{}).
 			// For(&v1beta1.DeployRegion{}).
 			// Watches(&source.Kind{Type: &v1beta1.ExtendedDeployment{}}, &extendeddeploymentEventHandler{}).
+			Named(ControllerName).
 			Complete(r),
 		mgr.Add(r),
 	})

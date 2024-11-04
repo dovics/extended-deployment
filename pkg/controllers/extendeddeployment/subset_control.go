@@ -676,10 +676,10 @@ func (m *SubsetControl) regionSyncOnce(cd *v1beta1.ExtendedDeployment, regionNam
 
 	stepSize := calculateStepSize(cd, info.DesiredReplicas, *info.New.Spec.Replicas)
 
-	klog.Infof("regionSyncOnce %v-%v %v ,updateNewSs=%v ,calculateStepSize", cd.Namespace, cd.Name, regionName, updateNewSs, stepSize)
+	klog.Infof("regionSyncOnce %v-%v %v ,updateNewSs=%v ,calculateStepSize: %d", cd.Namespace, cd.Name, regionName, updateNewSs, stepSize)
 
 	if err = m.ScaleSubset(cd, info.New, *info.New.Spec.Replicas+stepSize); err != nil {
-		klog.Infof("regionSyncOnce %v-%v %v ,updateNewSs=%v ,scaleSubset err", cd.Namespace, cd.Name, regionName, updateNewSs, err.Error())
+		klog.Infof("regionSyncOnce %v-%v %v ,updateNewSs=%v ,scaleSubset err: %s", cd.Namespace, cd.Name, regionName, updateNewSs, err.Error())
 		return
 	}
 	updated = true

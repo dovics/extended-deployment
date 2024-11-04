@@ -184,7 +184,13 @@ func startPlacesetController(ctx controllerscontext.Context) (enabled bool, err 
 	mgr := ctx.Mgr
 	ctrl := inplaceset.NewInplaceSetReconciler(
 		ctx.Opts.DisableInplaceUpdate,
-		mgr.GetAPIReader(), mgr.GetClient(), mgr.GetScheme(), ctx.ClientSet, 50, mgr.GetEventRecorderFor(inplaceset.ControllerName))
+		mgr.GetAPIReader(),
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		ctx.ClientSet,
+		50,
+		mgr.GetEventRecorderFor(inplaceset.ControllerName),
+	)
 
 	if err := ctrl.SetupWithManager(mgr); err != nil {
 		return false, err
@@ -197,7 +203,7 @@ func startRescheduleController(ctx controllerscontext.Context) (enabled bool, er
 	controller := &reschedule.RescheduleReconciler{
 		Client:        mgr.GetClient(),
 		Scheme:        mgr.GetScheme(),
-		EventRecorder: mgr.GetEventRecorderFor(extendeddeployment.ControllerName),
+		EventRecorder: mgr.GetEventRecorderFor(reschedule.ControllerName),
 	}
 
 	if err := controller.Setup(ctx.StopChan, ctx.Informer); err != nil {

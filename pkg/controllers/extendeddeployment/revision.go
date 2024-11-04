@@ -242,9 +242,7 @@ func (dc *ExtendedDeploymentReconciler) truncateHistory(deploy *v1beta1.Extended
 	// 直接对历史版本截断，无需做任何判断
 	historyLimit := int(deploy.Spec.HistoryLimit)
 	his := make([]*appsv1.ControllerRevision, 0, len(revisions))
-	for _, r := range revisions {
-		his = append(his, r)
-	}
+	his = append(his, revisions...)
 
 	if len(his) <= historyLimit {
 		return nil
