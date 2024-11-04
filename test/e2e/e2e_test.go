@@ -31,10 +31,10 @@ import (
 )
 
 // namespace where the project is deployed in
-const namespace = "extended-deployment-system"
+const namespace = "extended-system"
 
 // serviceAccountName created for the project
-const serviceAccountName = "extended-deployment-controller-manager"
+const serviceAccountName = "extended-controller-manager"
 
 // metricsServiceName is the name of the metrics service of the project
 const metricsServiceName = "extended-deployment-controller-manager-metrics-service"

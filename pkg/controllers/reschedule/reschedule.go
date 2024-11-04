@@ -167,8 +167,8 @@ func (info ScheduleInfo) reschedule(targetRegions []string, scheduleNum int32) e
 
 		if bestRegion == nil || bestRegion.AllocatablePod <= 0 {
 			klog.Errorf("[Reschedule] failure schedule error: no region has enough resource to schedule")
-			//rc.ctr.emitWarningEvent(deployment, eventReasonRescheduleFailed,
-			//	"no region has enough resource to schedule")
+			// rc.ctr.emitWarningEvent(deployment, eventReasonRescheduleFailed,
+			// "no region has enough resource to schedule")
 			return ErrWithoutAvailableRegions
 		} else {
 			bestRegion.rescheduleReplicas++

@@ -636,7 +636,7 @@ func RemoveCondition(status *v1beta1.InplaceSetStatus, condType appsv1.ReplicaSe
 
 // filterOutCondition returns a new slice of replicaset conditions without conditions with the provided type.
 func filterOutCondition(conditions []appsv1.ReplicaSetCondition, condType appsv1.ReplicaSetConditionType) []appsv1.ReplicaSetCondition {
-	var newConditions []appsv1.ReplicaSetCondition
+	newConditions := []appsv1.ReplicaSetCondition{}
 	for _, c := range conditions {
 		if c.Type == condType {
 			continue

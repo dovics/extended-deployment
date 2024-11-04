@@ -83,7 +83,7 @@ func SetDeploymentCondition(status *v1beta1.ExtendedDeploymentStatus, condition 
 
 // filterOutCondition returns a new slice of deployment conditions without conditions with the provided type.
 func filterOutCondition(conditions []appsv1.DeploymentCondition, condType appsv1.DeploymentConditionType) []appsv1.DeploymentCondition {
-	var newConditions []appsv1.DeploymentCondition
+	newConditions := []appsv1.DeploymentCondition{}
 	for _, c := range conditions {
 		if c.Type == condType {
 			continue

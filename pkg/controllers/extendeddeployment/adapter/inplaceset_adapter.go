@@ -52,7 +52,7 @@ func (a *InplaceSetAdapter) GetReplicaDetails(obj metav1.Object, subset *Subset)
 	subset.Spec.Template = *set.Spec.Template.DeepCopy()
 	subset.Spec.Selector = set.Spec.Selector.DeepCopy()
 
-	//status
+	// status
 	subset.Status.Replicas = set.Status.Replicas
 	subset.Status.AvailableReplicas = set.Status.AvailableReplicas
 	if set.Status.InplaceUpdateStatus != nil {

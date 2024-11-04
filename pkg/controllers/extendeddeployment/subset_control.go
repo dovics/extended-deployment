@@ -474,15 +474,15 @@ func (m *SubsetControl) CheckInplaceUpdate(cd *v1beta1.ExtendedDeployment, info 
 	}
 
 	spec, exists, _ := utils.GetInplaceSetUpdateSpec(ss.Annotations)
-	// 第一次创建的inplaceset，不需要升级
+	// If the inplaceset is created for the first time, no upgrade is needed.
 	if !exists && info.New != nil {
 		return false, nil
 	}
-	//异常情况，需要清理InplacesetUpdateSpec
+	// In exceptional cases, the InplacesetUpdateSpec needs to be cleaned up.
 	if len(info.Olds) > 0 && exists {
 		utils.DelInplacesetUpdateSpec(ss.Annotations)
 	}
-	// 判断是否可以开始原地升级
+	// Determine whether an in-place upgrade can start.
 	if !m.isCanInplaceUpdate(cd, ss) {
 		return false, nil
 	}

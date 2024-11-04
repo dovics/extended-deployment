@@ -86,7 +86,6 @@ func applyJSONPatch(obj **v1.PodTemplateSpec, overrides []OverrideOption) error 
 	}
 
 	objectJSONBytes, err := json.Marshal(obj)
-	//objectJSONBytes, err := obj.MarshalJSON()
 	if err != nil {
 		return err
 	}

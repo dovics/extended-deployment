@@ -39,14 +39,14 @@ func (a *ReplicaSetAdapter) GetReplicaDetails(obj metav1.Object, subset *Subset)
 	// Convert to ReplicaSet Object
 	set := obj.(*appsv1.ReplicaSet)
 
-	//spec
+	// spec
 	subset.Spec.Replicas = set.Spec.Replicas
 	subset.Spec.MinReadySeconds = set.Spec.MinReadySeconds
-	//subset.Spec.UpdateStrategy.Type = v1beta1.UpdateStrategyType(set.Spec.Strategy.Type)
+	// subset.Spec.UpdateStrategy.Type = v1beta1.UpdateStrategyType(set.Spec.Strategy.Type)
 	subset.Spec.Template = *set.Spec.Template.DeepCopy()
 	subset.Spec.Selector = set.Spec.Selector.DeepCopy()
 
-	//status
+	// status
 	subset.Status.Replicas = set.Status.Replicas
 	subset.Status.AvailableReplicas = set.Status.AvailableReplicas
 
