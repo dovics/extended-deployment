@@ -253,7 +253,7 @@ func QueryInsufficientPodsBySubset(subset *adapter.Subset, podLister corelisters
 				strings.Contains(c.Message, errorMsgMemDetect) {
 				ret = append(ret, p)
 				klog.V(4).Infof("[Reschedule] Pod %v/%v pending for %v", p.Namespace, p.Name, c.Message)
-				sec := time.Now().Sub(c.LastTransitionTime.Time).Seconds()
+				sec := time.Since(c.LastTransitionTime.Time).Seconds()
 				if int(sec) > pendingSec {
 					pendingSec = int(sec)
 				}

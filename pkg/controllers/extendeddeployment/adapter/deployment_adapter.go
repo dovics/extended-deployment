@@ -36,7 +36,6 @@ func (a *DeploymentAdapter) GetStatusObservedGeneration(obj metav1.Object) int64
 
 // GetReplicaDetails returns the replicas detail the subset needs.
 func (a *DeploymentAdapter) GetReplicaDetails(obj metav1.Object, subset *Subset) (err error) {
-	//func (a *DeploymentAdapter) GetReplicaDetails(obj metav1.Object, updatedRevision string) (specReplicas, specPartition *int32, statusReplicas, statusReadyReplicas, statusUpdatedReplicas, statusUpdatedReadyReplicas int32, err error) {
 	// Convert to Deployment Object
 	set := obj.(*appsv1.Deployment)
 

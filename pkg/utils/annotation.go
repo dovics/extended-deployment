@@ -32,11 +32,11 @@ const (
 	IpsAnnotationRegionFailed         = "inplaceset.extendeddeployment.io/region-failed"
 )
 
-// InplaceSetUpdateSpec spec for controling inplace update, set in inplaceset's annotations
+// InplaceSetUpdateSpec spec for controlling inplace update, set in inplaceset's annotations
 type InplaceSetUpdateSpec struct {
 	// genereated by inplaceset spec
 	NewImages map[string]string `json:"-"`
-	// controling how many pods will be inplace updated
+	// controlling how many pods will be inplace updated
 	UpdatePodNum int `json:"updatePodNum"`
 	// update generation
 	PodTemplateHash string `json:"podTemplateHash"`

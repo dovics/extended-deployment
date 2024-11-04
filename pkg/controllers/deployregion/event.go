@@ -11,10 +11,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-type podEventHandler struct {
+type baseEventHandler struct {
 }
 
-func (p *podEventHandler) addToQueue(obj metav1.Object, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
+func (h *baseEventHandler) addToQueue(obj metav1.Object, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
 	req := ctrl.Request{}
 	req.Name = obj.GetName()
 	req.Namespace = PrefixPodType + obj.GetNamespace()
@@ -22,25 +22,25 @@ func (p *podEventHandler) addToQueue(obj metav1.Object, q workqueue.TypedRateLim
 }
 
 // Create is called in response to an create event - e.g. Pod Creation.
-func (p *podEventHandler) Create(ctx context.Context, e event.CreateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-	p.addToQueue(e.Object, q)
+func (h *baseEventHandler) Create(ctx context.Context, e event.CreateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
+	h.addToQueue(e.Object, q)
 }
 
 // Update is called in response to an update event -  e.g. Pod Updated.
-func (p *podEventHandler) Update(ctx context.Context, e event.UpdateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-	p.addToQueue(e.ObjectNew, q)
+func (h *baseEventHandler) Update(ctx context.Context, e event.UpdateEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
+	h.addToQueue(e.ObjectNew, q)
 	if e.ObjectNew.GetUID() != e.ObjectOld.GetUID() {
-		p.addToQueue(e.ObjectOld, q)
+		h.addToQueue(e.ObjectOld, q)
 	}
 }
 
 // Delete is called in response to a delete event - e.g. Pod Deleted.
-func (p *podEventHandler) Delete(ctx context.Context, e event.DeleteEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-	p.addToQueue(e.Object, q)
+func (h *baseEventHandler) Delete(ctx context.Context, e event.DeleteEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
+	h.addToQueue(e.Object, q)
 }
 
 // Generic is called in response to an event of an unknown type or a synthetic event triggered as a cron or
 // external trigger request - e.g. reconcile Autoscaling, or a Webhook.
-func (p *podEventHandler) Generic(ctx context.Context, e event.GenericEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
-	p.addToQueue(e.Object, q)
+func (h *baseEventHandler) Generic(ctx context.Context, e event.GenericEvent, q workqueue.TypedRateLimitingInterface[reconcile.Request]) {
+	h.addToQueue(e.Object, q)
 }

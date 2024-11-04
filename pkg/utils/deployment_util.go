@@ -162,9 +162,9 @@ var annotationsToSkip = map[string]bool{
 	AnnotationRollbackTo:           true,
 	AnnotationRevision:             true,
 	AnnotationRollTerm:             true,
-	//RevisionHistoryAnnotation:      true,
-	//DesiredReplicasAnnotation:      true,
-	//MaxReplicasAnnotation:          true,
+	// RevisionHistoryAnnotation:      true,
+	// DesiredReplicasAnnotation:      true,
+	// MaxReplicasAnnotation:          true,
 }
 
 func getSkippedAnnotations(annotations map[string]string) map[string]string {

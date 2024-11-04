@@ -196,7 +196,7 @@ func (r *InplaceSetReconciler) GetPodInplaceSets(pod *corev1.Pod) ([]*v1beta1.In
 		return nil, err
 	}
 
-	var rss []*v1beta1.InplaceSet
+	rss := make([]*v1beta1.InplaceSet, len(list))
 	for _, ips := range list {
 		if ips.Namespace != pod.Namespace {
 			continue

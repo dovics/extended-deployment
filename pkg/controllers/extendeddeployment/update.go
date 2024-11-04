@@ -222,10 +222,7 @@ func ValidatedLabelSelectorAsSelector(ps *metav1.LabelSelector) (labels.Selector
 
 	selector := labels.NewSelector()
 	for k, v := range ps.MatchLabels {
-		r, err := newRequirement(k, selection.Equals, []string{v})
-		if err != nil {
-			return nil, err
-		}
+		r := newRequirement(k, selection.Equals, []string{v})
 		selector = selector.Add(*r)
 	}
 	for _, expr := range ps.MatchExpressions {
@@ -242,16 +239,13 @@ func ValidatedLabelSelectorAsSelector(ps *metav1.LabelSelector) (labels.Selector
 		default:
 			return nil, fmt.Errorf("%q is not a valid pod selector operator", expr.Operator)
 		}
-		r, err := newRequirement(expr.Key, op, append([]string(nil), expr.Values...))
-		if err != nil {
-			return nil, err
-		}
+		r := newRequirement(expr.Key, op, append([]string(nil), expr.Values...))
 		selector = selector.Add(*r)
 	}
 	return selector, nil
 }
 
-func newRequirement(key string, op selection.Operator, vals []string) (*labels.Requirement, error) {
+func newRequirement(key string, op selection.Operator, vals []string) *labels.Requirement {
 	sel := &labels.Requirement{}
 	selVal := reflect.ValueOf(sel)
 	val := reflect.Indirect(selVal)
@@ -270,7 +264,7 @@ func newRequirement(key string, op selection.Operator, vals []string) (*labels.R
 		*valuesFieldPtr = vals
 	}
 
-	return sel, nil
+	return sel
 }
 
 func (dc *ExtendedDeploymentReconciler) UpdateProgressing(ctx context.Context, deploy *v1beta1.ExtendedDeployment) error {

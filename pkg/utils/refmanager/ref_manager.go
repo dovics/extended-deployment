@@ -29,7 +29,8 @@ type RefManager struct {
 
 // New returns a RefManager that exposes
 // methods to manage the controllerRef of pods.
-func New(client client.Client, selector *metav1.LabelSelector, owner metav1.Object, schema *runtime.Scheme) (*RefManager, error) {
+func New(client client.Client, selector *metav1.LabelSelector,
+	owner metav1.Object, schema *runtime.Scheme) (*RefManager, error) {
 	s, err := metav1.LabelSelectorAsSelector(selector)
 	if err != nil {
 		return nil, err
@@ -49,7 +50,8 @@ func New(client client.Client, selector *metav1.LabelSelector, owner metav1.Obje
 }
 
 // ClaimOwnedObjects tries to take ownership of a list of objects for this controller.
-func (mgr *RefManager) ClaimOwnedObjects(objs []metav1.Object, filters ...func(metav1.Object) bool) ([]metav1.Object, error) {
+func (mgr *RefManager) ClaimOwnedObjects(objs []metav1.Object,
+	filters ...func(metav1.Object) bool) ([]metav1.Object, error) {
 	match := func(obj metav1.Object) bool {
 		if !mgr.selector.Matches(labels.Set(obj.GetLabels())) {
 			return false
@@ -109,7 +111,8 @@ var getOwner = func(owner metav1.Object, schema *runtime.Scheme, c client.Client
 		return nil, fmt.Errorf("can't get owner %s/%s: fail to cast to client.Object", owner.GetNamespace(), owner.GetName())
 	}
 
-	if err := c.Get(context.TODO(), client.ObjectKey{Namespace: owner.GetNamespace(), Name: owner.GetName()}, clientObj); err != nil {
+	if err := c.Get(context.TODO(),
+		client.ObjectKey{Namespace: owner.GetNamespace(), Name: owner.GetName()}, clientObj); err != nil {
 		return nil, err
 	}
 	return obj, nil
@@ -158,16 +161,19 @@ func (mgr *RefManager) adopt(obj metav1.Object) error {
 	}
 
 	if err := controllerutil.SetControllerReference(mgr.owner, obj, mgr.schema); err != nil {
-		return fmt.Errorf("can't set Object %v/%v (%v) owner reference: %v", obj.GetNamespace(), obj.GetName(), obj.GetUID(), err)
+		return fmt.Errorf("can't set Object %v/%v (%v) owner reference: %v",
+			obj.GetNamespace(), obj.GetName(), obj.GetUID(), err)
 	}
 
 	clientObj, ok := obj.(client.Object)
 	if !ok {
-		return fmt.Errorf("can't update Object %v/%v (%v) owner reference: fail to cast to client.Object", obj.GetNamespace(), obj.GetName(), obj.GetUID())
+		return fmt.Errorf("can't update Object %v/%v (%v) owner reference: fail to cast to client.Object",
+			obj.GetNamespace(), obj.GetName(), obj.GetUID())
 	}
 
 	if err := mgr.updateOwner(clientObj); err != nil {
-		return fmt.Errorf("can't update Object %v/%v (%v) owner reference: %v", obj.GetNamespace(), obj.GetName(), obj.GetUID(), err)
+		return fmt.Errorf("can't update Object %v/%v (%v) owner reference: %v",
+			obj.GetNamespace(), obj.GetName(), obj.GetUID(), err)
 	}
 	return nil
 }
@@ -183,7 +189,8 @@ func (mgr *RefManager) release(obj metav1.Object) error {
 	if idx > -1 {
 		clientObj, ok := obj.(runtime.Object).DeepCopyObject().(client.Object)
 		if !ok {
-			return fmt.Errorf("can't remove Pod %v/%v (%v) owner reference: fail to cast to client.Object", obj.GetNamespace(), obj.GetName(), obj.GetUID())
+			return fmt.Errorf("can't remove Pod %v/%v (%v) owner reference: fail to cast to client.Object",
+				obj.GetNamespace(), obj.GetName(), obj.GetUID())
 		}
 
 		clientObj.SetOwnerReferences(append(clientObj.GetOwnerReferences()[:idx], clientObj.GetOwnerReferences()[idx+1:]...))

@@ -71,14 +71,6 @@ func nextRevision(revisions []*appsv1.ControllerRevision) int64 {
 	return revisions[count-1].Revision + 1
 }
 
-func maxRevision(revisions []*appsv1.ControllerRevision) int64 {
-	count := len(revisions)
-	if count <= 0 {
-		return 1
-	}
-	return revisions[count-1].Revision
-}
-
 func maxRevisionForSubsets(objs []*adapter.Subset) (int64, error) {
 	max := int64(0)
 	for _, obj := range objs {

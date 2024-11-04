@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
-	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -34,10 +33,6 @@ import (
 const updateRetries = 5
 
 type SubsetControl struct {
-	ctx       context.Context
-	startTime time.Time
-	endTime   time.Time
-
 	controller *ExtendedDeploymentReconciler
 
 	key string // namespace/name
@@ -327,7 +322,6 @@ func (m *SubsetControl) ManageSubsets(cd *v1beta1.ExtendedDeployment) (anyRegion
 						klog.Errorf("%s new subset error: %v", m.key, err)
 						return updated, err
 					}
-					updated = true
 				}
 				allRSs := append(ri.Olds, ri.New)
 				_, err = m.reconcileNewSubset(cd, allRSs, ri.New, ri)
@@ -351,7 +345,7 @@ func (m *SubsetControl) ManageSubsets(cd *v1beta1.ExtendedDeployment) (anyRegion
 		}
 	}
 
-	return
+	return anyRegionUpdated, err
 }
 
 // ScaleSubset scales the replicas of subset
@@ -642,7 +636,7 @@ func (m *SubsetControl) regionSyncOnce(cd *v1beta1.ExtendedDeployment, regionNam
 	klog.Infof("regionSyncOnce %v-%v %v ,updateNewSs=%v ,oldReplicas=%v,maxCleanupCount=%v,cleanupCount=%v", cd.Namespace, cd.Name, regionName, updateNewSs,
 		oldReplicas, maxCleanupCount, cleanupCount)
 	if err != nil {
-		return
+		return updated, err
 	}
 
 	updated = true
@@ -660,7 +654,7 @@ func (m *SubsetControl) regionSyncOnce(cd *v1beta1.ExtendedDeployment, regionNam
 			// 一个inplaceset副本数足够缩容
 			if *ss.Spec.Replicas > needScaleDown {
 				if err = m.ScaleSubset(cd, ss, *ss.Spec.Replicas-needScaleDown); err != nil {
-					return
+					return updated, err
 				}
 				klog.Infof("regionSyncOnce %v-%v %v ,updateNewSs=%v ,scaleSubset", cd.Namespace, cd.Name, regionName, updateNewSs)
 				updated = true
@@ -671,7 +665,7 @@ func (m *SubsetControl) regionSyncOnce(cd *v1beta1.ExtendedDeployment, regionNam
 	}
 
 	if !updateNewSs {
-		return
+		return updated, err
 	}
 
 	stepSize := calculateStepSize(cd, info.DesiredReplicas, *info.New.Spec.Replicas)
@@ -680,11 +674,10 @@ func (m *SubsetControl) regionSyncOnce(cd *v1beta1.ExtendedDeployment, regionNam
 
 	if err = m.ScaleSubset(cd, info.New, *info.New.Spec.Replicas+stepSize); err != nil {
 		klog.Infof("regionSyncOnce %v-%v %v ,updateNewSs=%v ,scaleSubset err: %s", cd.Namespace, cd.Name, regionName, updateNewSs, err.Error())
-		return
+		return updated, err
 	}
-	updated = true
 
-	return
+	return true, nil
 }
 
 func (m *SubsetControl) cleanupUnhealthyReplicas(cd *v1beta1.ExtendedDeployment, regionName string, maxCleanupCount int32) (int32, error) {
@@ -705,7 +698,7 @@ func (m *SubsetControl) cleanupUnhealthyReplicas(cd *v1beta1.ExtendedDeployment,
 			continue
 		}
 
-		klog.Infof("Found %d avaliable pods in old Subset %s/%s",
+		klog.Infof("Found %d available pods in old Subset %s/%s",
 			targetSs.Status.AvailableReplicas, targetSs.Namespace, targetSs.Name)
 
 		scaleDownCount := integer.Int32Min(*targetSs.Spec.Replicas-targetSs.Status.AvailableReplicas,

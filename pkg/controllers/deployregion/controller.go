@@ -95,8 +95,8 @@ func (r *DeployRegionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1beta1.DeployRegion{}).
-		Watches(&corev1.Pod{}, &podEventHandler{}).
-		Watches(&corev1.Node{}, &nodeEventHandler{}).
+		Watches(&corev1.Pod{}, &baseEventHandler{}).
+		Watches(&corev1.Node{}, &baseEventHandler{}).
 		Complete(r)
 }
 

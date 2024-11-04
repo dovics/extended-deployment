@@ -80,12 +80,13 @@ func (d *syncContext) CheckRegionStatus(regionName string) {
 		// 找到该 ExtendedDeployment 故障的分区列表
 		failedRegions := make([]string, 0)
 		for _, region := range deploy.Spec.Regions {
-			tempStatus := regionStatusUnknown
+			var tempStatus regionStatus
 			if region.Name == regionName {
 				tempStatus = newStatus
 			} else {
 				tempStatus = d.Cache.Regions[region.Name].status
 			}
+
 			if tempStatus == regionStatusFailed {
 				failedRegions = append(failedRegions, region.Name)
 			}

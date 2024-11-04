@@ -24,7 +24,8 @@ type Adapter interface {
 	// GetReplicaDetails returns the replicas information of the subset status.
 	GetReplicaDetails(obj metav1.Object, subset *Subset) error
 	// ApplySubsetTemplate updates the subset to the latest revision.
-	ApplySubsetTemplate(cd *v1beta1.ExtendedDeployment, dr *v1beta1.DeployRegion, template *v1.PodTemplateSpec, replicas int32, obj runtime.Object) error
+	ApplySubsetTemplate(cd *v1beta1.ExtendedDeployment, dr *v1beta1.DeployRegion,
+		template *v1.PodTemplateSpec, replicas int32, obj runtime.Object) error
 	// SetReplicas set replicas of subset
 	SetReplicas(obj runtime.Object, replicas int32)
 	// SetUpdateStrategy set MinReadySeconds and GracePeriodSeconds
