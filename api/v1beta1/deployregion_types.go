@@ -25,7 +25,7 @@ import (
 
 // DeployRegionSpec defines the desired state of DeployRegion
 type DeployRegionSpec struct {
-	//+kubebuilder:validation:MinProperties=1
+	// +kubebuilder:validation:MinProperties=1
 	// Partition match labels
 	MatchLabels map[string]string `json:"matchLabels"`
 }

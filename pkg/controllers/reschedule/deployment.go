@@ -162,7 +162,6 @@ func convertToSubset(set metav1.Object, ad adapter.Adapter) (*adapter.Subset, er
 		// ClusterName:                set.GetClusterName(),
 	}
 
-	//specReplicas, specPartition, statusReplicas, statusReadyReplicas, statusUpdatedReplicas, statusUpdatedReadyReplicas, err := m.adapter.GetReplicaDetails(set, updatedRevision)
 	err := ad.GetReplicaDetails(set, subset)
 	if err != nil {
 		return subset, err

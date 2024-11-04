@@ -46,10 +46,10 @@ type SubsetSpec struct {
 	// +optional
 	UpdateStrategy UpdateStrategy `json:"updateStrategy,omitempty"`
 
-	//// Selector is a label query over pods that should match the replica count.
-	//// Label keys and values that must match in order to be controlled by this replica set.
-	//// It must match the pod template's labels.
-	//// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
+	// Selector is a label query over pods that should match the replica count.
+	// Label keys and values that must match in order to be controlled by this replica set.
+	// It must match the pod template's labels.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
 	Selector *metav1.LabelSelector `json:"selector" protobuf:"bytes,2,opt,name=selector"`
 
 	// Template is the object that describes the pod that will be created if
@@ -69,7 +69,6 @@ type SubsetStatus struct {
 
 	// The number of pods that have labels matching the labels of the pod template of the replicaset.
 	// +optional
-	//FullyLabeledReplicas int32 `json:"fullyLabeledReplicas,omitempty" protobuf:"varint,2,opt,name=fullyLabeledReplicas"`
 
 	// the status of inplace update
 	// +optional
@@ -82,22 +81,9 @@ type SubsetStatus struct {
 	// The number of available replicas (ready for at least minReadySeconds) for this replica set.
 	// +optional
 	AvailableReplicas int32 `json:"availableReplicas,omitempty" protobuf:"varint,5,opt,name=availableReplicas"`
-
-	// ObservedGeneration reflects the generation of the most recently observed ReplicaSet.
-	// +optional
-	//ObservedGeneration int64 `json:"observedGeneration,omitempty" protobuf:"varint,3,opt,name=observedGeneration"`
-
-	// Represents the latest available observations of a replica set's current state.
-	// +optional
-	// +patchMergeKey=type
-	// +patchStrategy=merge
-	//Conditions []appsv1.ReplicaSetCondition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,6,rep,name=conditions"`
 }
 
 type InplaceUpdateStatus struct {
-	// +optional
-	//ReadyReplicas int32 `json:"readyReplicas" protobuf:"varint,4,opt,name=readyReplicas"`
-
 	// The number of available replicas (ready for at least minReadySeconds) for this replica set.
 	// +optional
 	AvailableReplicas int32 `json:"availableReplicas" protobuf:"varint,5,opt,name=availableReplicas"`

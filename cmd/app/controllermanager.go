@@ -238,7 +238,7 @@ func setupControllers(client clientset.Interface, mgr controllerruntime.Manager,
 	if err := controllers.StartControllers(controllerContext); err != nil {
 		klog.Fatalf("error starting controllers: %v", err)
 	}
-	//block until informer sync complete
+	// block until informer sync complete
 	sharedInformer.Start(stopChan)
 	sharedInformer.WaitForCacheSync(stopChan)
 	go func() {

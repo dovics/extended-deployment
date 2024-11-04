@@ -400,7 +400,6 @@ func (m *SubsetControl) convertToSubset(set metav1.Object) (*adapter.Subset, err
 		// ClusterName:                set.GetClusterName(),
 	}
 
-	//specReplicas, specPartition, statusReplicas, statusReadyReplicas, statusUpdatedReplicas, statusUpdatedReadyReplicas, err := m.adapter.GetReplicaDetails(set, updatedRevision)
 	err := m.adapter.GetReplicaDetails(set, subset)
 	if err != nil {
 		return subset, err

@@ -132,7 +132,6 @@ func (r *InplaceSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 // Start starts an asynchronous loop that monitors the status of cluster.
 func (dc *InplaceSetReconciler) Start(ctx context.Context) error {
-	//new
 	return nil
 }
 

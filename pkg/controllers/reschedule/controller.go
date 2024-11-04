@@ -135,7 +135,6 @@ func (r *RescheduleReconciler) reconcile(req ctrl.Request) error {
 				return err
 			}
 
-			//klog.V(4).Infof("[Reschedule] ExtendedDeployment %v: \n subset: %v\ninsufficientPods %v\nsec: %v", req.NamespacedName,subset, pods, sec)
 			if len(pods) > 0 {
 				insufficientPods[regionName] = append(insufficientPods[regionName], pods...)
 				if sec > deploymentObject.Spec.Strategy.AutoReschedule.TimeoutSeconds {

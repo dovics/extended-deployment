@@ -162,16 +162,19 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 		klog.V(4).Infof("extendeddeployment %v is deleted, return", key)
 		return ctrl.Result{}, nil
 	}
-	//检查回滚
+
+	// Check if a rollback is needed
 	needRollback, err := dc.checkRollback(ctx, deploy)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+
 	if needRollback {
-		klog.V(4).Infof("%s need roll back", key)
+		klog.V(4).Infof("%s needs to be rolled back", key)
 		return ctrl.Result{}, nil
 	}
-	//同步revision
+
+	// Synchronize revision
 	needSyncRevison, err := dc.syncRevisions(ctx, deploy)
 	if err != nil {
 		klog.Errorf("%s sync revision error: %s", key, err.Error())
@@ -181,12 +184,13 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 	if needSyncRevison {
 		return ctrl.Result{}, nil
 	}
-	//校验selector
+
+	// Validate selector
 	if err = dc.checkSelector(deploy); err != nil {
 		klog.Errorf("%s check selector error: %s", key, err.Error())
 		return ctrl.Result{}, nil
 	}
-	//校验region
+	// Validate region
 	regionMap, err := dc.checkRegions(ctx, deploy, key)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -197,8 +201,7 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	klog.V(4).Infof("%s start getSubsetControl, type %s", key, deploy.Spec.SubsetType)
-
-	//获取subset控制器
+	// Get the subset controller
 	subsetControl, err := dc.getSubsetControl(deploy)
 	if err != nil {
 		klog.Errorf("%s getSubsetControl error: %s", key, err.Error())
@@ -206,11 +209,11 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	subsetControl.SetDeployKey(key)
 
-	klog.V(4).Infof("%s start QuerySubsetAndRegionInfo ", key)
+	klog.V(4).Infof("%s start QuerySubsetAndRegionInfo", key)
 
-	//查询subset及region数据
+	// Query subset and region data
 	if err = subsetControl.QuerySubsetAndRegionInfo(deploy, regionMap); err != nil {
-		klog.V(4).Infof("%s QuerySubsetAndRegionInfo error: %s ", key, err.Error())
+		klog.V(4).Infof("%s QuerySubsetAndRegionInfo error: %s", key, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -223,11 +226,11 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	klog.V(4).Infof("%s start checkSaturated ", key)
-	//检查是否达到最终状态
+	// Check if the final state has been reached
 	if dc.checkSaturated(regionInfos) {
-		klog.V(4).Infof("%s start cleanAfterSaturated ", key)
+		klog.V(4).Infof("%s start cleanAfterSaturated", key)
 		if err = dc.cleanAfterSaturated(ctx, deploy, key, regionInfos, subsetControl); err != nil {
-			klog.V(4).Infof("%s cleanAfterSaturated error: %s ", key, err.Error())
+			klog.V(4).Infof("%s cleanAfterSaturated error: %s", key, err.Error())
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, nil
@@ -235,9 +238,9 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	klog.V(4).Infof("%s start check term ", key)
 
-	//检查term
+	// Check the term status
 	termFlag := dc.checkIfTermReady(regionInfos)
-	klog.V(4).Infof("termInit=0,termReady=1,termNotReady=2 , --> term termFlag = %v , Conditions=%+v , %s",
+	klog.V(4).Infof("termInit=0, termReady=1, termNotReady=2, --> term termFlag = %v, Conditions=%+v, %s",
 		termFlag,
 		deploy.Status.Conditions,
 		key)
@@ -256,9 +259,10 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 				klog.Errorf("%s check confirm annotation error: %s", key, err.Error())
 				return ctrl.Result{RequeueAfter: 1 * time.Second}, err
 			}
+
 			if needWait {
 				klog.V(4).Infof("%s wait to confirm annotation.", key)
-				// 刷新时间，避免等待确认超时
+				// Refresh the timestamp to avoid waiting for confirmation timeout
 				return ctrl.Result{}, dc.SyncStatusOnly(ctx, deploy, regionInfos, true, false)
 			} else {
 				klog.V(4).Infof("%s term next exec when needWait=false", key)
@@ -274,7 +278,7 @@ func (dc *ExtendedDeploymentReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	klog.V(4).Infof("%s start ManageSubsets ", key)
 
-	//调度workload
+	// Schedule workload
 	updated, err := subsetControl.ManageSubsets(deploy)
 	if err != nil {
 		klog.Errorf("%s ManageSubsets error: %s", key, err.Error())
@@ -310,11 +314,11 @@ func (dc *ExtendedDeploymentReconciler) stopHandler(err error, e interface{}) (n
 	return
 }
 
-// checkUpgradeConfirm 等待升级确认
+// checkUpgradeConfirm waits for upgrade confirmation
 func (dc *ExtendedDeploymentReconciler) checkUpgradeConfirm(ctx context.Context, deploy *v1beta1.ExtendedDeployment) (bool, error) {
-	// 需要确认
-	// 如果注解不存在，无需确认，是第一次同步
-	// 如果注解存在，必须为 true
+	// Confirmation is required
+	// If the annotation does not exist, no confirmation is needed, indicating it is the first synchronization
+	// If the annotation exists, it must be "true"
 	if deploy.Spec.Strategy.NeedWaitingForConfirm {
 		confirm, exists := deploy.Annotations[utils.AnnotationUpgradeConfirm]
 		if !exists {
@@ -329,7 +333,7 @@ func (dc *ExtendedDeploymentReconciler) checkUpgradeConfirm(ctx context.Context,
 			return true, nil
 		}
 
-		//开启了第一次等待确认， 后面就不需要确认了.
+		// If the first confirmation has been completed, no further confirmation is needed.
 		if deploy.Spec.Strategy.NeedFirstConfirm {
 			return false, nil
 		}
@@ -347,9 +351,9 @@ func (dc *ExtendedDeploymentReconciler) checkUpgradeConfirm(ctx context.Context,
 	return false, nil
 }
 
-// checkSelector 检查template中的selector
+// checkSelector checks the selector in the template
 func (dc *ExtendedDeploymentReconciler) checkSelector(deploy *v1beta1.ExtendedDeployment) error {
-	// 检查selector是否一致
+	// Check if the selector is consistent
 	selector, err := metav1.LabelSelectorAsSelector(deploy.Spec.Selector)
 	if err != nil {
 		err = fmt.Errorf("label selector is invalid: %v", err)
@@ -370,7 +374,7 @@ func (dc *ExtendedDeploymentReconciler) checkSelector(deploy *v1beta1.ExtendedDe
 	return nil
 }
 
-// getSubsetControl 获取subset ControlInterface
+// getSubsetControl gets the subset ControlInterface
 func (dc *ExtendedDeploymentReconciler) getSubsetControl(deploy *v1beta1.ExtendedDeployment) (adapter.ControlInterface, error) {
 	ci := dc.subSetControls[v1beta1.InPlaceSetSubsetType]
 	if ciNew, ok := dc.subSetControls[deploy.Spec.SubsetType]; ok {
@@ -385,9 +389,8 @@ func (dc *ExtendedDeploymentReconciler) getSubsetControl(deploy *v1beta1.Extende
 	return ci, nil
 }
 
-// checkIfTermReady 检查本轮次同步是否完成
+// checkIfTermReady checks if the current round of synchronization is complete
 func (dc *ExtendedDeploymentReconciler) checkIfTermReady(regionInfoMap map[string]*adapter.RegionInfo) int {
-
 	for _, ri := range regionInfoMap {
 		if ri.New == nil {
 			return termInit
@@ -400,13 +403,14 @@ func (dc *ExtendedDeploymentReconciler) checkIfTermReady(regionInfoMap map[strin
 	return termReady
 }
 
-// checkSaturated 检查是否达到最终状态
+// checkSaturated checks if the final state has been reached
 func (dc *ExtendedDeploymentReconciler) checkSaturated(regionInfoMap map[string]*adapter.RegionInfo) bool {
 	for _, ri := range regionInfoMap {
 		if !ri.ReplicasDesired || !ri.AvailableDesired {
-			// 未饱和，退出继续后续流程
+			// Not saturated, exit and continue subsequent processes
 			return false
 		}
 	}
+
 	return true
 }

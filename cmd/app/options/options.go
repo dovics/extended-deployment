@@ -36,7 +36,7 @@ type Options struct {
 	// SecurePort is the port that the the server serves at.
 	// Note: We hope support https in the future once controller-runtime provides the functionality.
 	SecurePort int
-	//set Propagation 并发数
+	// Set the number of concurrent propagations
 	PropagationWorkSyncs int
 
 	// LeaderElection determines whether or not to use leader election when
@@ -100,7 +100,7 @@ func (o *Options) AddFlags(flags *pflag.FlagSet) {
 	flags.StringSliceVar(&o.SkippedPropagatingNamespaces, "skipped-propagating-namespaces", []string{},
 		"Comma-separated namespaces that should be skipped from propagating in addition to the default skipped namespaces(namespaces prefixed by kube- ).")
 	flags.IntVar(&o.InplaceWorkSyncs, "inplaceset-resource-template-syncs", 5, "The number of resource templates that are allowed to sync concurrently.")
-	//o.RateLimiterOpts.AddFlags(flags)
+	// o.RateLimiterOpts.AddFlags(flags)
 
 	flags.BoolVar(&o.LeaderElection, "leader-elect", false, ""+
 		"Start a leader election client and gain leadership before "+
