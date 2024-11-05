@@ -17,7 +17,7 @@ spec:
     rolloutStrategy: Beta
     updateStrategy: 
       gracePeriodSeconds: 1
-      type: ReCreate
+      type: InPlaceIfPossible
   template:
     metadata:
       labels:

@@ -22,10 +22,14 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
 
+	zaplogfmt "github.com/sykesm/zap-logfmt"
+	uzap "go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/informers"
 	clientset "k8s.io/client-go/kubernetes"
@@ -34,6 +38,7 @@ import (
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/dovics/extendeddeployment/cmd/app/options"
 	"github.com/dovics/extendeddeployment/pkg/admission_webhook"
@@ -77,6 +82,25 @@ func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
 	// 因为 generic 中有 klog-v1 的参数解析，只有先 add logs 才能使得 klog/v2 生效
 	cmd.Flags().AddFlagSet(logsFlagSet)
 	cmd.Flags().AddFlagSet(genericFlagSet)
+
+	// Initialize a logger for the controller runtime
+	leveler := uzap.LevelEnablerFunc(func(level zapcore.Level) bool {
+		// Set the level fairly high since it's so verbose
+		return level >= zapcore.DPanicLevel
+	})
+	stackTraceLeveler := uzap.LevelEnablerFunc(func(level zapcore.Level) bool {
+		// Attempt to suppress the stack traces in the logs since they are so verbose.
+		// The controller runtime seems to ignore this since the stack is still always printed.
+		return false
+	})
+	logfmtEncoder := zaplogfmt.NewEncoder(uzap.NewProductionEncoderConfig())
+	logger := zap.New(
+		zap.Level(leveler),
+		zap.StacktraceLevel(stackTraceLeveler),
+		zap.UseDevMode(false),
+		zap.WriteTo(os.Stdout),
+		zap.Encoder(logfmtEncoder))
+	log.SetLogger(logger)
 
 	return cmd
 }

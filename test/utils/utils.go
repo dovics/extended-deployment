@@ -252,8 +252,6 @@ func UncommentCode(filename, target, prefix string) error {
 }
 
 func ExpectPodRunning(g Gomega, podName string, namespace string) {
-	g.Expect(podName).To(ContainSubstring("extendeddeployment-sample"))
-
 	// Validate the pod's status
 	cmd := exec.Command("kubectl", "get",
 		"pods", podName, "-o", "jsonpath={.status.phase}",

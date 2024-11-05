@@ -44,11 +44,6 @@ var _ = Describe("Manager", Ordered, func() {
 		_, err := utils.Run(cmd)
 		Expect(err).NotTo(HaveOccurred(), "Failed to create namespace")
 
-		By("creating test namespace")
-		cmd = exec.Command("kubectl", "create", "ns", testNamespace)
-		_, err = utils.Run(cmd)
-		Expect(err).NotTo(HaveOccurred(), "Failed to create test namespace")
-
 		By("installing CRDs")
 		cmd = exec.Command("make", "install")
 		_, err = utils.Run(cmd)
@@ -56,11 +51,6 @@ var _ = Describe("Manager", Ordered, func() {
 
 		By("deploying the controller-manager")
 		cmd = exec.Command("make", "deploy", fmt.Sprintf("IMG=%s", projectImage))
-		_, err = utils.Run(cmd)
-		Expect(err).NotTo(HaveOccurred(), "Failed to deploy the controller-manager")
-
-		By("deploying the controller-manager")
-		cmd = exec.Command("make", "sample", fmt.Sprintf("IMG=%s", projectImage))
 		_, err = utils.Run(cmd)
 		Expect(err).NotTo(HaveOccurred(), "Failed to deploy the controller-manager")
 	})
@@ -150,6 +140,8 @@ var _ = Describe("Manager", Ordered, func() {
 				podNames := utils.GetNonEmptyLines(podOutput)
 				g.Expect(podNames).To(HaveLen(1), "expected 1 controller pod running")
 				controllerPodName = podNames[0]
+
+				g.Expect(controllerPodName).To(ContainSubstring("extended-controller-manager"))
 				utils.ExpectPodRunning(g, controllerPodName, namespace)
 			}
 			Eventually(verifyControllerUp).Should(Succeed())
@@ -168,9 +160,36 @@ var _ = Describe("Manager", Ordered, func() {
 	})
 
 	Context("ExtendedDeployment", func() {
+		BeforeAll(func() {
+			By("creating test namespace")
+			cmd := exec.Command("kubectl", "create", "ns", testNamespace)
+			_, err := utils.Run(cmd)
+			Expect(err).NotTo(HaveOccurred(), "Failed to create namespace")
+		})
+
+		AfterAll(func() {
+			By("removing test namespace")
+			cmd := exec.Command("kubectl", "delete", "ns", testNamespace)
+			_, _ = utils.Run(cmd)
+		})
+
+		BeforeEach(func() {
+			By("deploying the sample")
+			cmd := exec.Command("make", "deploy-sample", fmt.Sprintf("NAMESPACE=%s", testNamespace))
+			_, err := utils.Run(cmd)
+			Expect(err).NotTo(HaveOccurred(), "Failed to deploy the sample")
+		})
+
+		AfterEach(func() {
+			By("undeploying the sample")
+			cmd := exec.Command("make", "undeploy-sample", fmt.Sprintf("NAMESPACE=%s", testNamespace))
+			_, err := utils.Run(cmd)
+			Expect(err).NotTo(HaveOccurred(), "Failed to undeploy the controller-manager")
+		})
+
 		It("sample run successfully", func() {
 			By("validating that the extendeddeployment pod is running as expected")
-			verifyControllerUp := func(g Gomega) {
+			verifySampleUp := func(g Gomega) {
 				cmd := exec.Command("kubectl", "get",
 					"pods", "-l", "app=test",
 					"-o", "go-template={{ range .items }}"+
@@ -181,14 +200,69 @@ var _ = Describe("Manager", Ordered, func() {
 				)
 
 				podOutput, err := utils.Run(cmd)
-				g.Expect(err).NotTo(HaveOccurred(), "Failed to retrieve controller-manager pod information")
+				g.Expect(err).NotTo(HaveOccurred(), "Failed to retrieve sample pod information")
+				podNames := utils.GetNonEmptyLines(podOutput)
+				g.Expect(podNames).To(HaveLen(2), "expected 2 pod running")
+				for _, podName := range podNames {
+					g.Expect(podName).To(ContainSubstring("extendeddeployment-sample"),
+						"expected pod name to contain extendeddeployment-sample")
+					utils.ExpectPodRunning(g, podName, testNamespace)
+				}
+			}
+			Eventually(verifySampleUp).Should(Succeed())
+		})
+
+		It("sample inplace update should work", func() {
+			By("checking the sample deployment")
+			inplaceUpdateSuccess := func(g Gomega) {
+
+				cmd := exec.Command("kubectl", "get",
+					"pods", "-l", "app=test",
+					"-o", "go-template={{ range .items }}"+
+						"{{ if not .metadata.deletionTimestamp }}"+
+						"{{ .metadata.name }}"+
+						"{{ \"\\n\" }}{{ end }}{{ end }}",
+					"-n", testNamespace,
+				)
+
+				podOutput, err := utils.Run(cmd)
+				g.Expect(err).NotTo(HaveOccurred(), "Failed to retrieve sample pod information")
 				podNames := utils.GetNonEmptyLines(podOutput)
 				g.Expect(podNames).To(HaveLen(2), "expected 2 pod running")
 				for _, podName := range podNames {
 					utils.ExpectPodRunning(g, podName, testNamespace)
 				}
+
+				cmd = exec.Command("kubectl", "patch", "extendeddeployment",
+					"extendeddeployment-sample", "--type", "json",
+					"-p", "[{\"op\": \"replace\", "+
+						"\"path\": \"/spec/template/spec/containers/0/image\", \"value\":\"busybox\"}]",
+					"-n", testNamespace,
+				)
+				_, err = utils.Run(cmd)
+				g.Expect(err).NotTo(HaveOccurred(), "Failed to patch extended deployment")
+
+				_, _ = utils.Run(exec.Command("bash", "-c", "sleep 30"))
+				cmd = exec.Command("kubectl", "get",
+					"pods", "-l", "app=test",
+					"-o", "go-template={{ range .items }}"+
+						"{{ if not .metadata.deletionTimestamp }}"+
+						"{{ .metadata.name }}"+
+						"{{ \"\\n\" }}{{ end }}{{ end }}",
+					"-n", testNamespace,
+				)
+
+				podOutput, err = utils.Run(cmd)
+				g.Expect(err).NotTo(HaveOccurred(), "Failed to retrieve controller-manager pod information")
+				podNamesAfterUpdate := utils.GetNonEmptyLines(podOutput)
+
+				g.Expect(podNamesAfterUpdate).Should(ContainElements(podNames))
+				for _, podName := range podNamesAfterUpdate {
+					utils.ExpectPodRunning(g, podName, testNamespace)
+				}
 			}
-			Eventually(verifyControllerUp).Should(Succeed())
+			Eventually(inplaceUpdateSuccess).Should(Succeed())
 		})
 	})
+
 })
