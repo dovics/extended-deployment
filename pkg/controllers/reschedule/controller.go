@@ -1,3 +1,18 @@
+/*
+Copyright 2024.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package reschedule
 
 import (
@@ -142,7 +157,8 @@ func (r *RescheduleReconciler) reconcile(req ctrl.Request) error {
 					continue
 				}
 
-				// FIXME: 某一个pod调度等待时间未超时，其他pod是否就不能调度，是否应该暂时不调度这个pod，已经达到时间的pod就调度
+				// FIXME: If one pod's scheduling wait time has not expired, should other pods not be scheduled?
+				// Should we temporarily not schedule this pod and only schedule pods whose wait time has expired?
 				klog.V(4).Infof("[Reschedule] ExtendedDeployment %v wait pending pod in %v", req.NamespacedName, regionName)
 				return ErrPendingNotTimeout
 			}

@@ -1,3 +1,18 @@
+/*
+Copyright 2024.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package extendeddeployment
 
 import (
@@ -198,10 +213,10 @@ func (dc *ExtendedDeploymentReconciler) syncRevisions(ctx context.Context, deplo
 			d.Namespace, d.Name,
 			d.Annotations[utils.AnnotationRevision])
 		// FIXME:
-		// 更新 status 后，还需要继续更新注解，
-		// 如果不更新直接结束，不重新入队，因为是更新status，不会再次触发，会导致更新事件被忽略
-		// 如果不更新立即结束，立即重新入队，又会导致两次更新间隔很短，也会出现错误
-		// 如果继续更新注解，可能会导致更新注解错误
+		// After updating the status, we still need to update the annotations.
+		// If we do not update and directly end, it will not be re-queued because the status update does not trigger another event, leading to ignored update events.
+		// If we immediately end and re-queue, it may result in very short intervals between updates, which can also cause errors.
+		// If we continue to update the annotations, it might lead to annotation update errors.
 	} else {
 		if err := dc.updateAnnotations(ctx, d); err != nil {
 			klog.Errorf("update revision extendeddeployment %v:%v annotations error: %v",
@@ -229,9 +244,9 @@ func (dc *ExtendedDeploymentReconciler) syncRevisions(ctx context.Context, deplo
 	return true, nil
 }
 
-// truncateHistory 删除多余的历史版本
+// truncateHistory deletes excess historical versions
 func (dc *ExtendedDeploymentReconciler) truncateHistory(deploy *v1beta1.ExtendedDeployment, revisions []*appsv1.ControllerRevision, curRv *appsv1.ControllerRevision, updateRv *appsv1.ControllerRevision) error {
-	// 直接对历史版本截断，无需做任何判断
+	// Directly truncate the history without any additional checks
 	historyLimit := int(deploy.Spec.HistoryLimit)
 	his := make([]*appsv1.ControllerRevision, 0, len(revisions))
 	his = append(his, revisions...)

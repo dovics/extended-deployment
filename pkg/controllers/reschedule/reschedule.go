@@ -1,3 +1,18 @@
+/*
+Copyright 2024.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package reschedule
 
 import (
@@ -26,11 +41,11 @@ type ScheduleInfo struct {
 type scheduleRegionInfo struct {
 	name string
 
-	configReplicas     int32
-	scheduleReplicas   int32 // 目前调度进入的副本数
-	rescheduleReplicas int32 // 准备调度进入的副本数
+	configReplicas     int32 // Configured number of replicas
+	scheduleReplicas   int32 // Current number of replicas scheduled into the region
+	rescheduleReplicas int32 // Number of replicas planned to be scheduled into the region
 
-	AllocatablePod int64 // 可分配的pod总数
+	AllocatablePod int64 // Total number of allocatable pods
 }
 
 func NewScheduleRegionInfo(deployment *v1beta1.ExtendedDeployment) (*ScheduleInfo, error) {
@@ -84,18 +99,19 @@ func (info ScheduleInfo) SetRescheduleAnnotation(obj metav1.Object) error {
 
 func (info ScheduleInfo) RescheduleFailedRegions(regionsMap map[string]bool) error {
 	/*
-	 * 1. 遍历故障分区，统计需要转移的副本数
-	 * 2. 根据非故障区 InplaceSet 确定分区 request 的资源
-	 * 3. 遍历非故障分区的Node，统计非故障分区可以容纳的 pod 数，以及总剩余资源数量
-	 * 4. 逐个将待转移副本填入最优分区，每次转入后分区资源降低
-	 * 5. 得到转移的数据，将转移数据以注解形式写入
+	 * 1. Iterate through the failed regions and count the number of replicas that need to be transferred.
+	 * 2. Determine the resource requests for the partitions based on the non-failed InplaceSets.
+	 * 3. Iterate through the nodes in the non-failed regions to count the number of pods that
+	 *    can be accommodated and the total remaining resources.
+	 * 4. Transfer the replicas to the optimal region one by one, reducing the region's resources after each transfer.
+	 * 5. Write the transfer data as annotations.
 	 */
 	if len(regionsMap) == 0 {
 		return nil
 	}
 
 	targetRegion := make([]string, 0)
-	schedulePodNum := int32(0) // 需要调度的副本数
+	schedulePodNum := int32(0) // Number of replicas that need to be scheduled
 	for name, region := range info.regionsInfo {
 		if failed := regionsMap[name]; failed {
 			schedulePodNum += region.configReplicas
@@ -109,25 +125,28 @@ func (info ScheduleInfo) RescheduleFailedRegions(regionsMap map[string]bool) err
 
 	return info.reschedule(targetRegion, schedulePodNum)
 
-	/*  对于分区故障转移后资源的限制
-	 * 1. 资源不足转移
-	 *    一旦generation发生变化，资源不足自动调度的内容就失效
-	 * 2. 故障调度
-	 *    一旦generation发生变化，之前的调度失效，需要删除重新调度
-	 * 3. 资源不足和故障同时存在？？？
-	 *    故障调度时，不可以进行自动调度
+	/* Resource constraints for partition failure transfers:
+	 * 1. Insufficient resource transfer
+	 *    If the generation changes, the automatic scheduling content for insufficient resources becomes invalid.
+	 * 2. Failure scheduling
+	 *    If the generation changes, the previous scheduling becomes invalid and needs to be deleted and rescheduled.
+	 * 3. Both insufficient resources and failures exist?
+	 *    During failure scheduling, automatic scheduling should not be performed.
 	 */
 }
 
 func (info ScheduleInfo) RescheduleInsufficientPods(insufficientPods map[string][]*corev1.Pod) error {
-	// 获取可以调度的目标region
+	// Get the target regions that can be scheduled
 	scheduleInRegions := make([]string, 0)
 	for regionName, region := range info.regionsInfo {
-		if _, exists := insufficientPods[regionName]; exists { // 存在，表示有pod因资源不足而pending，无法转入
+		// Exists, indicating that there are pods pending due to insufficient resources,
+		// cannot be transferred in
+		if _, exists := insufficientPods[regionName]; exists {
 			continue
 		}
-
-		if region.rescheduleReplicas < region.configReplicas { // 分区有副本转出，表示资源不足或存在故障，无法转入
+		// The region has replicas to be transferred out, indicating resource
+		// insufficiency or failure, cannot be transferred in
+		if region.rescheduleReplicas < region.configReplicas {
 			continue
 		}
 
@@ -137,10 +156,10 @@ func (info ScheduleInfo) RescheduleInsufficientPods(insufficientPods map[string]
 	for regionName, pods := range insufficientPods {
 		desiredReplicas, nowSubsetReplicas := info.regionsInfo[regionName].configReplicas, info.regionsInfo[regionName].scheduleReplicas
 
-		// 成功启动的 Pod 数
+		// Number of successfully started Pods
 		info.regionsInfo[regionName].rescheduleReplicas = nowSubsetReplicas - int32(len(pods))
 
-		// 启动失败或者还没有启动的 Pod 数
+		// Number of Pods that failed to start or have not yet started
 		out := desiredReplicas - info.regionsInfo[regionName].rescheduleReplicas
 		if err := info.reschedule(scheduleInRegions, out); err != nil {
 			return err
@@ -149,9 +168,8 @@ func (info ScheduleInfo) RescheduleInsufficientPods(insufficientPods map[string]
 
 	return nil
 }
-
 func (info ScheduleInfo) reschedule(targetRegions []string, scheduleNum int32) error {
-	// 选择最优分区，逐个将副本转移
+	// Select the optimal partition and transfer replicas one by one
 	for i := int32(0); i < scheduleNum; i++ {
 		var bestRegion *scheduleRegionInfo
 		for _, region := range targetRegions {
@@ -196,7 +214,8 @@ func CheckAnnotation(object metav1.Object) (RescheduleType, bool, error) {
 		return RescheduleUnknown, false, err
 	}
 
-	if spec != nil && spec.Generation != object.GetGeneration() { // Generation 不匹配，调度信息过期
+	// Generation mismatch, schedule information is outdated
+	if spec != nil && spec.Generation != object.GetGeneration() {
 		klog.Warningf("[Reschedule] ExtendedDeployment %v/%v schedule info out of date, delete it",
 			object.GetNamespace(), object.GetName())
 
@@ -204,15 +223,14 @@ func CheckAnnotation(object metav1.Object) (RescheduleType, bool, error) {
 		return RescheduleUnknown, false, nil
 	}
 
-	// just for info
+	// Just for information
 	failedRegion, ok := utils.GetFailedFlag(object)
-	if !ok { // 无分区故障
+	if !ok { // No region failure
 		klog.V(4).Infof("[Reschedule] ExtendedDeployment %v/%v without failed region", object.GetNamespace(), object.GetName())
 		if spec == nil {
-			klog.V(4).Infof("[Reschedule] ExtendedDeployment %v/%v has not been reschedule", object.GetNamespace(), object.GetName())
+			klog.V(4).Infof("[Reschedule] ExtendedDeployment %v/%v has not been rescheduled", object.GetNamespace(), object.GetName())
 			return RescheduleNever, true, nil
 		}
-
 		if spec.FailureRegion == "" {
 			klog.V(4).Infof("[Reschedule] ExtendedDeployment %v/%v has been reschedule for resource insufficient", object.GetNamespace(), object.GetName())
 			return RescheduleForResourceInsufficient, true, nil

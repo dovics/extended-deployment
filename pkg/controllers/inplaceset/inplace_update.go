@@ -1,3 +1,18 @@
+/*
+Copyright 2024.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package inplaceset
 
 import (
@@ -115,7 +130,8 @@ func RemoveInPlaceUpdateGrace(obj metav1.Object) {
 // defaultPatchUpdateSpecToPod returns new pod that merges spec into old pod
 func patchUpdateSpecToPod(pod *corev1.Pod, updateSpec *PodUpdateSpec, state *PodInPlaceUpdateState) *corev1.Pod {
 
-	klog.V(5).Infof("Begin to in-place update pod %s/%s with update spec %v, state %v", pod.Namespace, pod.Name, DumpJSON(updateSpec), DumpJSON(state))
+	klog.V(5).Infof("Begin to in-place update pod %s/%s with update spec %v, state %v",
+		pod.Namespace, pod.Name, DumpJSON(updateSpec), DumpJSON(state))
 
 	// DO NOT modify the fields in spec for it may have to retry on conflict in updatePodInPlace
 

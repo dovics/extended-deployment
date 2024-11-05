@@ -1,3 +1,18 @@
+/*
+Copyright 2024.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package inplaceset
 
 import (
@@ -646,7 +661,9 @@ func filterOutCondition(conditions []appsv1.ReplicaSetCondition, condType appsv1
 }
 
 // updateInplaceSetStatus attempts to update the Status.Replicas of the given ReplicaSet, with a single GET/PUT retry.
-func (r *InplaceSetReconciler) updateInplaceSetStatus(ips *v1beta1.InplaceSet, newStatus v1beta1.InplaceSetStatus) (*v1beta1.InplaceSet, error) {
+func (r *InplaceSetReconciler) updateInplaceSetStatus(
+	ips *v1beta1.InplaceSet,
+	newStatus v1beta1.InplaceSetStatus) (*v1beta1.InplaceSet, error) {
 	maredStatus, err := json.Marshal(newStatus)
 	if err != nil {
 		return nil, err
