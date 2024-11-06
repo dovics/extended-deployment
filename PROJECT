@@ -6,7 +6,7 @@ domain: extendeddeployment.io
 layout:
 - go.kubebuilder.io/v4
 projectName: extended-deployment
-repo: extendeddeployment.io/extended-deployment
+repo: github.com/dovics/extendeddeployment
 resources:
 - api:
     crdVersion: v1
@@ -16,6 +16,10 @@ resources:
   kind: ExtendedDeployment
   path: github.com/dovics/extendeddeployment/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -24,6 +28,10 @@ resources:
   kind: InplaceSet
   path: github.com/dovics/extendeddeployment/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
