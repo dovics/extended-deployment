@@ -17,7 +17,7 @@ spec:
     rolloutStrategy: Beta
     updateStrategy: 
       gracePeriodSeconds: 1
-      type: ReCreate
+      type: InPlaceIfPossible
   template:
     metadata:
       labels:
@@ -34,9 +34,9 @@ spec:
           resources: { }
   regions:
     - name: region1
-      replicas: 3
+      replicas: 1
     - name: region2
-      replicas: 4
+      replicas: 1
   overriders:
     - name: region1
       overriders:

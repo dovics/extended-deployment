@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:golint,revive
+	. "github.com/onsi/gomega"
 )
 
 const (
@@ -248,4 +249,15 @@ func UncommentCode(filename, target, prefix string) error {
 	// false positive
 	// nolint:gosec
 	return os.WriteFile(filename, out.Bytes(), 0644)
+}
+
+func ExpectPodRunning(g Gomega, podName string, namespace string) {
+	// Validate the pod's status
+	cmd := exec.Command("kubectl", "get",
+		"pods", podName, "-o", "jsonpath={.status.phase}",
+		"-n", namespace,
+	)
+	output, err := Run(cmd)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(output).To(Equal("Running"), "Incorrect controller-manager pod status")
 }
