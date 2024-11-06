@@ -65,7 +65,6 @@ spec:
           - --v=4
           - --disable-inplace-update=false
           - --leader-elect=true
-          - --disable-webhook=true
         image: controller:latest
         name: manager
         securityContext:

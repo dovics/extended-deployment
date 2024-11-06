@@ -20,7 +20,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            dovics/extended-deployment
+            dovics1/extended-deployment
           tags: |
             type=ref,event=branch
             type=ref,event=pr

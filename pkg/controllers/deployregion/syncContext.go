@@ -165,6 +165,7 @@ func (d *syncContext) handleRegionEvent() {
 	region, err := d.controller.QueryRegion(d.ctx, d.name)
 	if err != nil || region == nil {
 		stopReconcile(err)
+		return
 	}
 
 	if region.DeletionTimestamp != nil {
