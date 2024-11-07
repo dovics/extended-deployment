@@ -41,7 +41,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/dovics/extendeddeployment/cmd/app/options"
-	"github.com/dovics/extendeddeployment/pkg/admission_webhook"
 	controllerscontext "github.com/dovics/extendeddeployment/pkg/controllers/context"
 	"github.com/dovics/extendeddeployment/pkg/controllers/deployregion"
 	"github.com/dovics/extendeddeployment/pkg/controllers/extendeddeployment"
@@ -51,6 +50,7 @@ import (
 	"github.com/dovics/extendeddeployment/pkg/utils/gclient"
 	"github.com/dovics/extendeddeployment/pkg/utils/informermanager"
 	"github.com/dovics/extendeddeployment/pkg/version"
+	webhook "github.com/dovics/extendeddeployment/pkg/webhook/v1beta1"
 )
 
 func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
@@ -143,9 +143,12 @@ func Run(ctx context.Context, opts *options.Options) error {
 
 	// webhook
 	if !opts.DisableWebhook {
-		if err := controllerManager.Add(admission_webhook.NewHookServer(opts.CertsDir, opts.WebhookPort)); err != nil {
-			klog.Errorf(`add webhook server`)
-			return err
+		if err := webhook.SetupExtendedDeploymentWebhookWithManager(controllerManager); err != nil {
+			klog.Fatalf("failed to add deployment webhook server: %v", err)
+		}
+
+		if err := webhook.SetupInplaceSetWebhookWithManager(controllerManager); err != nil {
+			klog.Fatalf("failed to add inplaceset webhook server: %v", err)
 		}
 	}
 

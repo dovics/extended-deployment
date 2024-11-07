@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -94,7 +95,9 @@ func (v *InplaceSetCustomValidator) ValidateCreate(ctx context.Context, obj runt
 	}
 	inplacesetlog.Info("Validation for InplaceSet upon creation", "name", inplaceset.GetName())
 
-	// TODO(user): fill in your validation logic upon object creation.
+	if errs := validateForInPlaceSet(inplaceset); len(errs) > 0 {
+		return nil, errors.NewAggregate(errs)
+	}
 
 	return nil, nil
 }
@@ -106,8 +109,6 @@ func (v *InplaceSetCustomValidator) ValidateUpdate(ctx context.Context, oldObj, 
 		return nil, fmt.Errorf("expected a InplaceSet object for the newObj but got %T", newObj)
 	}
 	inplacesetlog.Info("Validation for InplaceSet upon update", "name", inplaceset.GetName())
-
-	// TODO(user): fill in your validation logic upon object update.
 
 	return nil, nil
 }
