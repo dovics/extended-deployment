@@ -1,8 +1,42 @@
 # extended-deployment
-// TODO(user): Add simple overview of use/purpose
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+Extended Deployment, supporting multi-architecture deployment, partition deployment, fault detection, and automatic scheduling scenarios
+
+## Features
+- Partition Deployment: Deploy a service simultaneously across multiple partitions.
+- Partition: A partition is a logical concept, a logical grouping of Nodes that meet certain conditions, typically achieved by setting labels on Nodes and then setting application node affinity. For example, label all ARM architecture Nodes in the cluster with: kubernetes.io/arch: arm64, and all AMD architecture Nodes with: kubernetes.io/arch: amd64. These two labels can divide the cluster into two partitions, ARM and AMD.
+- Partition Reload: There may be differences between partitions, and there may also be configuration differences when deploying applications (such as image architecture differences). Partition reload achieves differentiated deployment between partitions.
+- Group Rolling: During release and upgrade, the process of rolling replicas to the target state is done in groups. The next group will only start rolling after the current group is completed. The number of replicas in each group is determined by step control.
+- Step Control: During release and upgrade, the size of the group can be controlled by step control during the replica group rolling process.
+Beta/Group Release: Beta release means that when creating a partition, the number of replicas is 1, while Group release means that the number of replicas is the group size when creating a partition. The purpose of Beta release is to verify whether the business configuration is correct at the beginning of the release. If there is an error, it can be corrected in time to avoid a large number of unavailable Pods due to configuration errors, consuming resources.
+- Wait for Confirmation: By setting a confirmation mechanism, during the release and upgrade process, each group needs manual confirmation before the next group starts.
+- Automatic Scheduling for Resource Shortage: During partition deployment, if a partition is short of resources and Pods cannot be scheduled, these replicas can be automatically transferred to other resource-sufficient partitions under the ExtendedDeployment.
+- Partition Fault Detection and Automatic Scheduling: Timely detection of whether partition nodes have faults. Once all nodes in a partition are detected to be faulty, partition fault scheduling will be triggered, and replicas in that partition will be scheduled to other normal partitions.
+- In-place Upgrade: If only the image is modified during the upgrade, an in-place upgrade can be performed, retaining the Pod and only replacing the container within the Pod.
+
+## Concept
+To achieve the above functionalities, three types of resources are designed: DeployRegion, ExtendedDeployment, and InplaceSet.
+
+### DeployRegion
+DeployRegion is a partition resource, belonging to the global cluster scope, existing solely as a partition definition. It is created during the cluster environment preparation phase and cannot be created, modified, or deleted once the environment is ready.
+> Note:
+> 1. When creating a partition, ensure that a node does not belong to multiple partitions simultaneously.
+> 2. It is advisable to set corresponding partition labels for all nodes to avoid certain node resources being unusable during partition deployment.
+> 3. In principle, partitions should not be modified once the cluster environment is ready. Modifications may lead to incorrect states in ExtendedDeployment that reference the partition, causing applications to malfunction.
+> 
+> If partition modification is necessary, the following conditions must be met first:
+> 1. When adding a partition, ensure that no node belongs to multiple partitions after the addition.
+> 2. When modifying a partition, only the selection labels of the partition can be changed. Before modification, ensure that no ExtendedDeployment business associated with the partition exists, as this may cause discrepancies between the actual deployment nodes of the ExtendedDeployment and the expected nodes after modification. After modification, ensure that no node belongs to multiple partitions.
+> 3. When deleting a partition, ensure that no ExtendedDeployment is associated with the partition, as this will cause subsequent state synchronization failures for the ExtendedDeployment associated with the partition.
+
+### ExtendedDeployment
+ExtendedDeployment is an application deployment resource, similar to Deployment in k8s. It mainly implements partition control, release strategies, fault awareness, and automatic transfer functions. An ExtendedDeployment can control multiple InplaceSets.
+
+### InplaceSet
+InplaceSet is a partition application resource, similar to ReplicasSet in k8s. An InplaceSet is associated with a DeployRegion, corresponding to a partition, and implements replica maintenance and in-place upgrade functions.
+
+### Compatibility with K8S Workload Resources (Deployment/ReplicaSet)
+In addition to InplaceSet, ExtendedDeployment can also control native K8S Deployment and ReplicaSet resources. Compared to InplaceSet, native resources do not have in-place upgrade functionality, but under the control of ExtendedDeployment, they also possess features such as partition deployment, partition reload, group rolling, step control, Beta/Group release, and automatic scheduling. If an application does not require in-place upgrades, it can specify the managed type as Deployment or ReplicaSet.
 
 ## Getting Started
 
@@ -88,13 +122,6 @@ Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/<org>/extended-deployment/<tag or branch>/dist/install.yaml
 ```
-
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
-**NOTE:** Run `make help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
 ## License
 
